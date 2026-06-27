@@ -62,7 +62,72 @@ function formatNumber(value: number | null): string {
   return value.toLocaleString("ko-KR");
 }
 
+function formatRarity(value: string): string {
+  const rarityLabels: Record<string, string> = {
+    common: "일반",
+    rare: "레어",
+    epic: "에픽",
+    legendary: "전설",
+  };
+  return rarityLabels[value.toLowerCase()] ?? value;
+}
+
+function parseEquipmentItem(item: unknown, label: string): EquipmentSlot {
+  if (item === null || item === undefined) {
+    return { label, name: "미장착" };
+  }
+
+  if (typeof item === "string") {
+    return { label, name: item };
+  }
+
+  if (item && typeof item === "object") {
+    const record = item as Record<string, unknown>;
+    const name = pickString(record as PublicProfile, [
+      "nameKo",
+      "nameEn",
+      "name",
+      "itemName",
+      "title",
+    ]);
+    const rarity = pickString(record as PublicProfile, ["rarity", "grade", "tier"], "");
+    const enhancementLevel = pickNumber(record as PublicProfile, [
+      "enhancementLevel",
+      "enhance",
+    ]);
+
+    const detailParts: string[] = [];
+    if (rarity !== "—" && rarity !== "") {
+      detailParts.push(formatRarity(rarity));
+    }
+    if (enhancementLevel !== null) {
+      detailParts.push(`+${enhancementLevel}`);
+    }
+
+    return {
+      label,
+      name: name === "—" ? "미장착" : name,
+      detail: detailParts.length > 0 ? detailParts.join(" · ") : undefined,
+    };
+  }
+
+  return { label, name: "미장착" };
+}
+
 function extractEquipment(profile: PublicProfile): EquipmentSlot[] {
+  // Focus RPG: weapon / armor / accessory 가 프로필 최상위에 위치
+  if (
+    "weapon" in profile ||
+    "armor" in profile ||
+    "accessory" in profile
+  ) {
+    return [
+      parseEquipmentItem(profile.weapon, "무기"),
+      parseEquipmentItem(profile.armor, "방어구"),
+      parseEquipmentItem(profile.accessory, "장신구"),
+    ];
+  }
+
   const raw =
     profile.equippedItems ??
     profile.equipment ??
@@ -71,34 +136,9 @@ function extractEquipment(profile: PublicProfile): EquipmentSlot[] {
     profile.items;
 
   if (Array.isArray(raw)) {
-    return EQUIPMENT_SLOT_LABELS.map((label, index) => {
-      const item = raw[index];
-      if (typeof item === "string") {
-        return { label, name: item };
-      }
-      if (item && typeof item === "object") {
-        const record = item as Record<string, unknown>;
-        const name = pickString(record as PublicProfile, [
-          "name",
-          "itemName",
-          "title",
-          "label",
-        ]);
-        const detail = pickString(record as PublicProfile, [
-          "grade",
-          "rarity",
-          "tier",
-          "enhance",
-          "level",
-        ], "");
-        return {
-          label,
-          name: name === "—" ? "미장착" : name,
-          detail: detail === "—" ? undefined : detail,
-        };
-      }
-      return { label, name: "미장착" };
-    });
+    return EQUIPMENT_SLOT_LABELS.map((label, index) =>
+      parseEquipmentItem(raw[index], label),
+    );
   }
 
   if (raw && typeof raw === "object") {
@@ -109,38 +149,22 @@ function extractEquipment(profile: PublicProfile): EquipmentSlot[] {
       ["accessory", "장신구"],
     ] as const;
 
-    return slotKeys.map(([key, label]) => {
-      const item = record[key] ?? record[label];
-      if (typeof item === "string") {
-        return { label, name: item };
-      }
-      if (item && typeof item === "object") {
-        const itemRecord = item as Record<string, unknown>;
-        const name = pickString(itemRecord as PublicProfile, [
-          "name",
-          "itemName",
-          "title",
-        ]);
-        const detail = pickString(itemRecord as PublicProfile, [
-          "grade",
-          "rarity",
-          "tier",
-        ], "");
-        return {
-          label,
-          name: name === "—" ? "미장착" : name,
-          detail: detail === "—" ? undefined : detail,
-        };
-      }
-      return { label, name: "미장착" };
-    });
+    return slotKeys.map(([key, label]) =>
+      parseEquipmentItem(record[key] ?? record[label], label),
+    );
   }
 
   return EQUIPMENT_SLOT_LABELS.map((label) => ({ label, name: "미장착" }));
 }
 
 function ProfileDashboard({ profile }: { profile: PublicProfile }) {
-  const title = pickString(profile, ["title", "honorTitle", "badge", "rankTitle"]);
+  const title = pickString(profile, [
+    "activeTitle",
+    "title",
+    "honorTitle",
+    "badge",
+    "rankTitle",
+  ]);
   const level = pickNumber(profile, ["level", "lv", "playerLevel", "characterLevel"]);
   const combatPower = pickNumber(profile, [
     "combatPower",
