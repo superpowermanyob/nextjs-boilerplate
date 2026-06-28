@@ -1,46 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
 import { Megaphone } from "lucide-react";
 
 import { useI18n } from "@/components/I18nProvider";
 import { resolveBannerText } from "@/lib/banner-text";
-import { getClientFirestore } from "@/lib/firebase";
+
+type BannerResponse = {
+  banner: Record<string, unknown> | null;
+  error?: string;
+};
 
 export function PatchNotesMarquee() {
   const { locale, t } = useI18n();
   const [bannerData, setBannerData] = useState<Record<string, unknown> | null>(
     null,
   );
-  const [enabled, setEnabled] = useState(true);
 
-  useEffect(() => {
-    const db = getClientFirestore();
-    const bannerRef = doc(db, "settings", "banner");
+  const loadBanner = useCallback(async () => {
+    try {
+      const response = await fetch("/api/banner", { cache: "no-store" });
+      const data = (await response.json()) as BannerResponse;
 
-    const unsubscribe = onSnapshot(
-      bannerRef,
-      (snapshot) => {
-        if (!snapshot.exists()) {
-          setBannerData(null);
-          setEnabled(true);
-          return;
-        }
-
-        const data = snapshot.data() as Record<string, unknown>;
-        setBannerData(data);
-        setEnabled(typeof data.enabled === "boolean" ? data.enabled : true);
-      },
-      () => {
+      if (!response.ok) {
         setBannerData(null);
-        setEnabled(true);
-      },
-    );
+        return;
+      }
 
-    return () => unsubscribe();
+      setBannerData(data.banner);
+    } catch {
+      setBannerData(null);
+    }
   }, []);
 
+  useEffect(() => {
+    void loadBanner();
+
+    const timer = window.setInterval(() => {
+      void loadBanner();
+    }, 30_000);
+
+    return () => window.clearInterval(timer);
+  }, [loadBanner]);
+
+  const enabled =
+    bannerData && typeof bannerData.enabled === "boolean"
+      ? bannerData.enabled
+      : true;
   const text = enabled ? resolveBannerText(bannerData, locale) : "";
 
   if (!text) {

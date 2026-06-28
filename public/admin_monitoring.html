@@ -55,6 +55,41 @@
         background: var(--panel);
       }
 
+      .auth-row {
+        display: grid;
+        gap: 12px;
+      }
+
+      @media (min-width: 640px) {
+        .auth-row {
+          grid-template-columns: 1fr auto;
+          align-items: end;
+        }
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      input,
+      textarea,
+      button {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #1c1c1f;
+        color: #fff;
+        font: inherit;
+      }
+
+      input,
+      textarea {
+        padding: 12px 14px;
+      }
+
       .locale-grid {
         display: grid;
         gap: 16px;
@@ -100,17 +135,12 @@
       }
 
       textarea {
-        width: 100%;
         min-height: 96px;
-        padding: 12px 14px;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        background: #121216;
-        color: #fff;
-        font: inherit;
         resize: vertical;
+        background: #121216;
       }
 
+      input:focus,
       textarea:focus {
         outline: none;
         border-color: rgba(83, 131, 232, 0.65);
@@ -118,14 +148,9 @@
       }
 
       button {
-        width: 100%;
-        margin-top: 20px;
         padding: 14px 16px;
         border: none;
-        border-radius: 12px;
         background: var(--accent);
-        color: #fff;
-        font: inherit;
         font-weight: 700;
         cursor: pointer;
       }
@@ -139,6 +164,11 @@
         cursor: wait;
       }
 
+      .auth-row button {
+        width: auto;
+        min-width: 120px;
+      }
+
       .status {
         margin-top: 12px;
         min-height: 20px;
@@ -148,16 +178,39 @@
       .status.error {
         color: #fca5a5;
       }
+
+      .hint {
+        margin-top: 8px;
+        font-size: 12px;
+        color: #9aa0ae;
+      }
     </style>
   </head>
   <body>
     <main>
       <h1>Focus RPG Admin Monitoring</h1>
       <p>
-        Firestore <code>settings/banner</code> 문서에 8개 언어 공지를 저장합니다.
-        웹사이트 전광판은 유저가 선택한 언어에 맞는 텍스트를 표시하고, 비어 있으면
-        한국어(ko)로 대체합니다.
+        배포 환경에서는 Firestore Rules 때문에 브라우저 직접 저장이 차단됩니다.
+        서버 API(<code>/api/admin/banner</code>)를 통해 8개 언어 공지를 저장합니다.
       </p>
+
+      <section>
+        <h2>관리자 인증</h2>
+        <div class="auth-row">
+          <div>
+            <label for="adminKey">Admin Key</label>
+            <input
+              id="adminKey"
+              type="password"
+              placeholder="Vercel의 ADMIN_BANNER_SECRET 값"
+              autocomplete="off"
+            />
+            <p class="hint">입력한 키는 이 브라우저 sessionStorage에만 저장됩니다.</p>
+          </div>
+          <button id="saveKeyBtn" type="button">키 저장</button>
+        </div>
+        <div id="authStatus" class="status"></div>
+      </section>
 
       <section>
         <h2>패치노트 전광판 (8개 국어)</h2>
@@ -168,15 +221,6 @@
     </main>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-        setDoc,
-        serverTimestamp,
-      } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
       const BANNER_LOCALES = [
         { code: "ko", flag: "🇰🇷", label: "한국어" },
         { code: "en", flag: "🇺🇸", label: "English" },
@@ -188,30 +232,38 @@
         { code: "ru", flag: "🇷🇺", label: "Русский" },
       ];
 
-      const LEGACY_TEXT_KEYS = ["text", "message", "content", "bannerText"];
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyALVVWopHFZzOAd4wqfXQCJJMHNUMk0rd0",
-        authDomain: "focusrpg-10da6.firebaseapp.com",
-        databaseURL:
-          "https://focusrpg-10da6-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "focusrpg-10da6",
-        storageBucket: "focusrpg-10da6.firebasestorage.app",
-        messagingSenderId: "666978949137",
-        appId: "1:666978949137:web:b8946689cd8b287b9df9b0",
-        measurementId: "G-K25TTT9PVC",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-      const bannerRef = doc(db, "settings", "banner");
+      const ADMIN_KEY_STORAGE = "focus-rpg-admin-banner-key";
       const form = document.getElementById("bannerForm");
       const statusEl = document.getElementById("bannerStatus");
+      const authStatusEl = document.getElementById("authStatus");
       const updateBtn = document.getElementById("updateBannerBtn");
+      const adminKeyInput = document.getElementById("adminKey");
+      const saveKeyBtn = document.getElementById("saveKeyBtn");
 
       function setStatus(message, isError = false) {
         statusEl.textContent = message;
         statusEl.classList.toggle("error", isError);
+      }
+
+      function setAuthStatus(message, isError = false) {
+        authStatusEl.textContent = message;
+        authStatusEl.classList.toggle("error", isError);
+      }
+
+      function getAdminKey() {
+        return sessionStorage.getItem(ADMIN_KEY_STORAGE) || "";
+      }
+
+      function saveAdminKey() {
+        const value = adminKeyInput.value.trim();
+        if (!value) {
+          setAuthStatus("Admin Key를 입력해 주세요.", true);
+          return;
+        }
+
+        sessionStorage.setItem(ADMIN_KEY_STORAGE, value);
+        adminKeyInput.value = "";
+        setAuthStatus("Admin Key가 저장되었습니다.");
       }
 
       function renderForm() {
@@ -242,37 +294,55 @@
         );
       }
 
-      function fillFormValues(data) {
-        const legacyText = LEGACY_TEXT_KEYS.map((key) => data[key]).find(
-          (value) => typeof value === "string" && value.trim(),
-        );
-
+      function fillFormValues(messages) {
         for (const { code } of BANNER_LOCALES) {
           const field = document.getElementById(`banner-${code}`);
-          if (!(field instanceof HTMLTextAreaElement)) {
-            continue;
-          }
-
-          const value = typeof data[code] === "string" ? data[code].trim() : "";
-          if (value) {
-            field.value = value;
-            continue;
-          }
-
-          if (code === "ko" && typeof legacyText === "string") {
-            field.value = legacyText.trim();
+          if (field instanceof HTMLTextAreaElement) {
+            field.value = typeof messages[code] === "string" ? messages[code] : "";
           }
         }
+      }
+
+      async function apiFetch(path, options = {}) {
+        const adminKey = getAdminKey();
+        if (!adminKey) {
+          throw new Error("Admin Key가 없습니다. 상단에서 키를 저장해 주세요.");
+        }
+
+        const response = await fetch(path, {
+          ...options,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${adminKey}`,
+            ...(options.headers || {}),
+          },
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || `Request failed (${response.status})`);
+        }
+
+        return data;
       }
 
       async function loadBanner() {
-        const snapshot = await getDoc(bannerRef);
-        if (!snapshot.exists()) {
+        if (!getAdminKey()) {
+          setAuthStatus("Admin Key를 저장하면 기존 공지를 불러올 수 있습니다.", true);
           return;
         }
 
-        fillFormValues(snapshot.data());
+        const data = await apiFetch("/api/admin/banner");
+        fillFormValues(data.messages || {});
+        setStatus("기존 공지를 불러왔습니다.");
       }
+
+      saveKeyBtn.addEventListener("click", () => {
+        saveAdminKey();
+        loadBanner().catch((error) => {
+          setStatus(error instanceof Error ? error.message : "불러오기 실패", true);
+        });
+      });
 
       updateBtn.addEventListener("click", async () => {
         const messages = readFormValues();
@@ -287,15 +357,10 @@
         setStatus("저장 중...");
 
         try {
-          await setDoc(
-            bannerRef,
-            {
-              ...messages,
-              enabled: true,
-              updatedAt: serverTimestamp(),
-            },
-            { merge: true },
-          );
+          await apiFetch("/api/admin/banner", {
+            method: "PUT",
+            body: JSON.stringify({ messages }),
+          });
 
           setStatus("");
           alert("업데이트 성공!");
@@ -310,11 +375,13 @@
       });
 
       renderForm();
-      loadBanner().catch((error) => {
-        const message =
-          error instanceof Error ? error.message : "배너를 불러오지 못했습니다.";
-        setStatus(message, true);
-      });
+
+      if (getAdminKey()) {
+        setAuthStatus("저장된 Admin Key가 있습니다.");
+        loadBanner().catch((error) => {
+          setStatus(error instanceof Error ? error.message : "불러오기 실패", true);
+        });
+      }
     </script>
   </body>
 </html>
