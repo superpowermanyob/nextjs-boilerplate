@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
 import { CouponShortcut } from "@/components/CouponShortcut";
+import { DiscordLink } from "@/components/DiscordLink";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
@@ -62,6 +63,7 @@ export default async function RootLayout({
           strategy="afterInteractive"
         />
         <I18nProvider>
+          <DiscordLink />
           <CouponShortcut />
           <LanguageSwitcher />
           {children}
