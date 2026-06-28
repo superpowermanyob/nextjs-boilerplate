@@ -8,6 +8,7 @@ import { CouponShortcut } from "@/components/CouponShortcut";
 import { DiscordLink } from "@/components/DiscordLink";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { StoreDownloadLinks } from "@/components/StoreDownloadLinks";
 import {
   buildRootMetadata,
   resolveLocaleFromAcceptLanguage,
@@ -64,6 +65,7 @@ export default async function RootLayout({
         />
         <I18nProvider>
           <DiscordLink />
+          <StoreDownloadLinks />
           <CouponShortcut />
           <LanguageSwitcher />
           {children}

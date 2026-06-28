@@ -91,7 +91,7 @@ export default function Home() {
       <PatchNotesMarquee />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(83,131,232,0.12),transparent_40%),radial-gradient(circle_at_80%_100%,rgba(139,92,246,0.08),transparent_35%)]" />
 
-      <main className="relative mx-auto w-full max-w-7xl px-4 pb-6 pt-28 sm:px-6 sm:pb-10 sm:pt-32 lg:px-8">
+      <main className="relative mx-auto w-full max-w-7xl px-4 pb-6 pt-36 sm:px-6 sm:pb-10 sm:pt-40 lg:px-8">
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_160px] lg:gap-8">
           <div className="min-w-0">
         <header className="mb-8 text-center">
