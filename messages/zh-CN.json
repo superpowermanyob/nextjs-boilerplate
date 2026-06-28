@@ -113,7 +113,33 @@
     "close": "关闭小部件",
     "open": "社区",
     "discord": "💬 官方 Discord",
-    "bugReport": "🐛 向开发者报告 Bug"
+    "bugReport": "🐛 向开发者报告 Bug",
+    "coupon": "🎫 网页兑换码"
+  },
+  "coupon": {
+    "metaTitle": "网页兑换码 | Focus RPG",
+    "metaDescription": "输入游戏内 UUID 或注册邮箱和兑换码，奖励将发放至游戏邮箱。",
+    "badge": "Web Coupon",
+    "title": "网页兑换码",
+    "subtitle": "面向 iOS 玩家的兑换码注册页面，奖励将发放至游戏内邮箱。",
+    "hint": "您的信息仅用于兑换码验证，请在游戏内邮箱查看奖励。",
+    "identifierLabel": "用户标识",
+    "identifierPlaceholder": "请输入游戏内 UUID 或注册邮箱",
+    "codeLabel": "兑换码",
+    "codePlaceholder": "请输入兑换码",
+    "submit": "使用兑换码",
+    "submitting": "处理中…",
+    "success": "兑换成功，请在游戏内邮箱查看奖励。",
+    "backHome": "返回首页",
+    "errors": {
+      "identifierRequired": "请输入用户标识。",
+      "couponRequired": "请输入兑换码。",
+      "USER_NOT_FOUND": "用户不存在。",
+      "COUPON_INVALID": "无效的兑换码。",
+      "COUPON_ALREADY_USED": "该兑换码已使用过。",
+      "INVALID_INPUT": "请检查输入内容。",
+      "SERVER_ERROR": "服务器错误，请稍后重试。"
+    }
   },
   "notFound": {
     "title": "未找到玩家",

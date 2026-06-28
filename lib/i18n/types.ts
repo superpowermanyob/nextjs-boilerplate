@@ -114,6 +114,32 @@ export type Dictionary = {
     open: string;
     discord: string;
     bugReport: string;
+    coupon: string;
+  };
+  coupon: {
+    metaTitle: string;
+    metaDescription: string;
+    badge: string;
+    title: string;
+    subtitle: string;
+    hint: string;
+    identifierLabel: string;
+    identifierPlaceholder: string;
+    codeLabel: string;
+    codePlaceholder: string;
+    submit: string;
+    submitting: string;
+    success: string;
+    backHome: string;
+    errors: {
+      identifierRequired: string;
+      couponRequired: string;
+      USER_NOT_FOUND: string;
+      COUPON_INVALID: string;
+      COUPON_ALREADY_USED: string;
+      INVALID_INPUT: string;
+      SERVER_ERROR: string;
+    };
   };
   notFound: {
     title: string;

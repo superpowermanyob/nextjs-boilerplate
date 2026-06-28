@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bug, MessageCircle, X } from "lucide-react";
+import Link from "next/link";
+import { Bug, MessageCircle, Ticket, X } from "lucide-react";
 
 import { useI18n } from "@/components/I18nProvider";
 import { COMMUNITY_LINKS } from "@/lib/community-links";
@@ -51,6 +52,14 @@ export function CommunityWidget() {
               <MessageCircle className="h-5 w-5 shrink-0 text-[#9eb8ff]" />
               {t.community.discord}
             </a>
+            <Link
+              href="/coupon"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded-xl border border-[#5383e8]/40 bg-[#5383e8]/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-[#5383e8]/20"
+            >
+              <Ticket className="h-5 w-5 shrink-0 text-[#9eb8ff]" />
+              {t.community.coupon}
+            </Link>
             <a
               href={COMMUNITY_LINKS.bugReport}
               target="_blank"

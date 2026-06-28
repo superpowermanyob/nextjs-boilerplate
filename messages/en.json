@@ -113,7 +113,33 @@
     "close": "Close widget",
     "open": "Community",
     "discord": "💬 Official Discord",
-    "bugReport": "🐛 Report a Bug"
+    "bugReport": "🐛 Report a Bug",
+    "coupon": "🎫 Redeem Web Coupon"
+  },
+  "coupon": {
+    "metaTitle": "Web Coupon Redemption | Focus RPG",
+    "metaDescription": "Enter your in-game UUID or signup email and coupon code to receive rewards in your mailbox.",
+    "badge": "Web Coupon",
+    "title": "Web Coupon Redemption",
+    "subtitle": "Coupon registration for iOS players. Rewards are delivered to your in-game mailbox.",
+    "hint": "Your information is used only for coupon validation. Check your in-game mailbox for rewards.",
+    "identifierLabel": "User Identifier",
+    "identifierPlaceholder": "Enter in-game UUID or signup email",
+    "codeLabel": "Coupon Code",
+    "codePlaceholder": "Enter coupon code",
+    "submit": "Redeem Coupon",
+    "submitting": "Processing…",
+    "success": "Coupon redeemed successfully. Please check your in-game mailbox.",
+    "backHome": "Back to Home",
+    "errors": {
+      "identifierRequired": "Please enter your user identifier.",
+      "couponRequired": "Please enter a coupon code.",
+      "USER_NOT_FOUND": "User not found.",
+      "COUPON_INVALID": "Invalid or expired coupon.",
+      "COUPON_ALREADY_USED": "This coupon has already been used.",
+      "INVALID_INPUT": "Please check your input.",
+      "SERVER_ERROR": "A server error occurred. Please try again later."
+    }
   },
   "notFound": {
     "title": "Player not found",

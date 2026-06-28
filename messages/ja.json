@@ -113,7 +113,33 @@
     "close": "ウィジェットを閉じる",
     "open": "コミュニティ",
     "discord": "💬 公式Discordへ",
-    "bugReport": "🐛 バグを報告する"
+    "bugReport": "🐛 バグを報告する",
+    "coupon": "🎫 Webクーポン交換"
+  },
+  "coupon": {
+    "metaTitle": "Webクーポン交換 | Focus RPG",
+    "metaDescription": "ゲーム内UUIDまたは登録メールとクーポンコードを入力して、報酬を郵便箱で受け取りましょう。",
+    "badge": "Web Coupon",
+    "title": "Webクーポン交換",
+    "subtitle": "iOSユーザー向けのクーポン登録ページです。報酬はゲーム内郵便箱に配布されます。",
+    "hint": "入力情報はクーポン検証のみに使用されます。報酬はゲーム内郵便箱で確認してください。",
+    "identifierLabel": "ユーザー識別子",
+    "identifierPlaceholder": "ゲーム内UUIDまたは登録メールを入力してください",
+    "codeLabel": "クーポンコード",
+    "codePlaceholder": "クーポンコードを入力してください",
+    "submit": "クーポンを使用する",
+    "submitting": "処理中…",
+    "success": "クーポンが登録されました。ゲーム内郵便箱を確認してください。",
+    "backHome": "ホームに戻る",
+    "errors": {
+      "identifierRequired": "ユーザー識別子を入力してください。",
+      "couponRequired": "クーポンコードを入力してください。",
+      "USER_NOT_FOUND": "存在しないユーザーです。",
+      "COUPON_INVALID": "無効なクーポンです。",
+      "COUPON_ALREADY_USED": "すでに使用済みのクーポンです。",
+      "INVALID_INPUT": "入力内容を確認してください。",
+      "SERVER_ERROR": "サーバーエラーが発生しました。しばらくしてから再度お試しください。"
+    }
   },
   "notFound": {
     "title": "プレイヤーが見つかりません",

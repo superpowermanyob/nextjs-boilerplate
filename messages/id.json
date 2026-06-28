@@ -113,7 +113,33 @@
     "close": "Tutup widget",
     "open": "Komunitas",
     "discord": "💬 Discord Resmi",
-    "bugReport": "🐛 Laporkan Bug"
+    "bugReport": "🐛 Laporkan Bug",
+    "coupon": "🎫 Tukar Kupon Web"
+  },
+  "coupon": {
+    "metaTitle": "Tukar Kupon Web | Focus RPG",
+    "metaDescription": "Masukkan UUID dalam game atau email pendaftaran dan kode kupon untuk menerima hadiah di kotak surat.",
+    "badge": "Web Coupon",
+    "title": "Tukar Kupon Web",
+    "subtitle": "Halaman pendaftaran kupon untuk pemain iOS. Hadiah dikirim ke kotak surat dalam game.",
+    "hint": "Informasi Anda hanya digunakan untuk validasi kupon. Periksa kotak surat dalam game untuk hadiah.",
+    "identifierLabel": "Identitas Pengguna",
+    "identifierPlaceholder": "Masukkan UUID dalam game atau email pendaftaran",
+    "codeLabel": "Kode Kupon",
+    "codePlaceholder": "Masukkan kode kupon",
+    "submit": "Gunakan Kupon",
+    "submitting": "Memproses…",
+    "success": "Kupon berhasil didaftarkan. Silakan periksa kotak surat dalam game.",
+    "backHome": "Kembali ke Beranda",
+    "errors": {
+      "identifierRequired": "Silakan masukkan identitas pengguna.",
+      "couponRequired": "Silakan masukkan kode kupon.",
+      "USER_NOT_FOUND": "Pengguna tidak ditemukan.",
+      "COUPON_INVALID": "Kupon tidak valid.",
+      "COUPON_ALREADY_USED": "Kupon ini sudah digunakan.",
+      "INVALID_INPUT": "Silakan periksa input Anda.",
+      "SERVER_ERROR": "Terjadi kesalahan server. Silakan coba lagi nanti."
+    }
   },
   "notFound": {
     "title": "Pemain tidak ditemukan",

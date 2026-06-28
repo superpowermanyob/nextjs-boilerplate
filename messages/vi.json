@@ -113,7 +113,33 @@
     "close": "Đóng widget",
     "open": "Cộng đồng",
     "discord": "💬 Discord chính thức",
-    "bugReport": "🐛 Báo lỗi cho nhà phát triển"
+    "bugReport": "🐛 Báo lỗi cho nhà phát triển",
+    "coupon": "🎫 Đổi phiếu Web"
+  },
+  "coupon": {
+    "metaTitle": "Đổi phiếu Web | Focus RPG",
+    "metaDescription": "Nhập UUID trong game hoặc email đăng ký và mã phiếu để nhận phần thưởng trong hộp thư.",
+    "badge": "Web Coupon",
+    "title": "Đổi phiếu Web",
+    "subtitle": "Trang đăng ký phiếu dành cho người chơi iOS. Phần thưởng được gửi vào hộp thư trong game.",
+    "hint": "Thông tin của bạn chỉ dùng để xác minh phiếu. Kiểm tra hộp thư trong game để nhận thưởng.",
+    "identifierLabel": "Định danh người dùng",
+    "identifierPlaceholder": "Nhập UUID trong game hoặc email đăng ký",
+    "codeLabel": "Mã phiếu",
+    "codePlaceholder": "Nhập mã phiếu",
+    "submit": "Sử dụng phiếu",
+    "submitting": "Đang xử lý…",
+    "success": "Phiếu đã được đăng ký. Vui lòng kiểm tra hộp thư trong game.",
+    "backHome": "Về trang chủ",
+    "errors": {
+      "identifierRequired": "Vui lòng nhập định danh người dùng.",
+      "couponRequired": "Vui lòng nhập mã phiếu.",
+      "USER_NOT_FOUND": "Người dùng không tồn tại.",
+      "COUPON_INVALID": "Phiếu không hợp lệ.",
+      "COUPON_ALREADY_USED": "Phiếu này đã được sử dụng.",
+      "INVALID_INPUT": "Vui lòng kiểm tra thông tin nhập vào.",
+      "SERVER_ERROR": "Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau."
+    }
   },
   "notFound": {
     "title": "Không tìm thấy người chơi",

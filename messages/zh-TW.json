@@ -113,7 +113,33 @@
     "close": "關閉小工具",
     "open": "社群",
     "discord": "💬 官方 Discord",
-    "bugReport": "🐛 向開發者回報 Bug"
+    "bugReport": "🐛 向開發者回報 Bug",
+    "coupon": "🎫 網頁兌換碼"
+  },
+  "coupon": {
+    "metaTitle": "網頁兌換碼 | Focus RPG",
+    "metaDescription": "輸入遊戲內 UUID 或註冊信箱與兌換碼，獎勵將發放至遊戲信箱。",
+    "badge": "Web Coupon",
+    "title": "網頁兌換碼",
+    "subtitle": "面向 iOS 玩家的兌換碼註冊頁面，獎勵將發放至遊戲內信箱。",
+    "hint": "您的資訊僅用於兌換碼驗證，請在遊戲內信箱查看獎勵。",
+    "identifierLabel": "使用者識別",
+    "identifierPlaceholder": "請輸入遊戲內 UUID 或註冊信箱",
+    "codeLabel": "兌換碼",
+    "codePlaceholder": "請輸入兌換碼",
+    "submit": "使用兌換碼",
+    "submitting": "處理中…",
+    "success": "兌換成功，請在遊戲內信箱查看獎勵。",
+    "backHome": "返回首頁",
+    "errors": {
+      "identifierRequired": "請輸入使用者識別。",
+      "couponRequired": "請輸入兌換碼。",
+      "USER_NOT_FOUND": "使用者不存在。",
+      "COUPON_INVALID": "無效的兌換碼。",
+      "COUPON_ALREADY_USED": "此兌換碼已使用過。",
+      "INVALID_INPUT": "請檢查輸入內容。",
+      "SERVER_ERROR": "伺服器錯誤，請稍後再試。"
+    }
   },
   "notFound": {
     "title": "找不到玩家",
