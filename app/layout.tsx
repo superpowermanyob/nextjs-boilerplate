@@ -5,10 +5,9 @@ import { headers } from "next/headers";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
 import { CouponShortcut } from "@/components/CouponShortcut";
-import { DiscordLink } from "@/components/DiscordLink";
+import { TopCenterLinks } from "@/components/TopCenterLinks";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { StoreDownloadLinks } from "@/components/StoreDownloadLinks";
 import {
   buildRootMetadata,
   resolveLocaleFromAcceptLanguage,
@@ -64,8 +63,7 @@ export default async function RootLayout({
           strategy="afterInteractive"
         />
         <I18nProvider>
-          <DiscordLink />
-          <StoreDownloadLinks />
+          <TopCenterLinks />
           <CouponShortcut />
           <LanguageSwitcher />
           {children}
