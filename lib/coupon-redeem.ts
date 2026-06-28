@@ -2,7 +2,7 @@ import "server-only";
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
-import { buildMailboxPayload } from "@/lib/coupon-mail";
+import { buildMailboxPayload, extractGemAmount, scoreMailboxRewardTemplate } from "@/lib/coupon-mail";
 import { CouponError } from "@/lib/coupon-errors";
 import { getAdminFirestore, getFirebaseAdminStatus } from "@/lib/firebase/admin";
 
@@ -133,6 +133,32 @@ async function findCouponByCode(code: string): Promise<CouponRecord | null> {
   return null;
 }
 
+async function findMailboxRewardTemplate(
+  userId: string,
+): Promise<Record<string, unknown> | null> {
+  const db = ensureAdminDb();
+  const snapshot = await db
+    .collection("users")
+    .doc(userId)
+    .collection("mailbox")
+    .limit(30)
+    .get();
+
+  let best: Record<string, unknown> | null = null;
+  let bestScore = 0;
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data() as Record<string, unknown>;
+    const score = scoreMailboxRewardTemplate(data);
+    if (score > bestScore) {
+      bestScore = score;
+      best = data;
+    }
+  }
+
+  return bestScore > 0 ? best : null;
+}
+
 export async function redeemCoupon(
   identifier: string,
   couponCode: string,
@@ -157,6 +183,13 @@ export async function redeemCoupon(
     throw new CouponError("COUPON_INVALID", "Coupon is invalid or expired.");
   }
 
+  if (extractGemAmount(coupon.data) == null) {
+    throw new CouponError(
+      "COUPON_INVALID",
+      "Coupon gem reward is missing or unreadable.",
+    );
+  }
+
   const normalizedCode = normalizeCouponCode(coupon.id);
   const historyId = `${user.id}_${normalizedCode}`;
   const historyRef = db.collection("coupon_history").doc(historyId);
@@ -165,6 +198,7 @@ export async function redeemCoupon(
     .doc(user.id)
     .collection("mailbox")
     .doc();
+  const rewardTemplate = await findMailboxRewardTemplate(user.id);
 
   await db.runTransaction(async (transaction) => {
     const historySnap = await transaction.get(historyRef);
@@ -175,7 +209,12 @@ export async function redeemCoupon(
     transaction.set(
       mailboxRef,
       {
-        ...buildMailboxPayload(coupon.data, normalizedCode, locale),
+        ...buildMailboxPayload(
+          coupon.data,
+          normalizedCode,
+          locale,
+          rewardTemplate,
+        ),
         createdAt: FieldValue.serverTimestamp(),
       },
     );

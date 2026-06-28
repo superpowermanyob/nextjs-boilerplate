@@ -5,28 +5,38 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 const REWARD_CONTAINER_KEYS = [
   "rewards",
   "reward",
+  "rewardList",
+  "rewardItems",
   "items",
   "attachments",
-  "rewardList",
+  "giftItems",
   "prizes",
   "loot",
   "mailRewards",
+  "compensation",
 ] as const;
 
-const CURRENCY_FIELDS: Array<{ source: string; target: string }> = [
-  { source: "gems", target: "gems" },
-  { source: "gem", target: "gem" },
-  { source: "gemCount", target: "gem" },
-  { source: "rewardGems", target: "gem" },
-  { source: "jewel", target: "gem" },
-  { source: "jewels", target: "gem" },
-  { source: "gold", target: "gold" },
-  { source: "coin", target: "gold" },
-  { source: "coins", target: "gold" },
-  { source: "dia", target: "dia" },
-  { source: "diamond", target: "dia" },
-  { source: "diamonds", target: "dia" },
-];
+const GEM_FIELD_NAMES = [
+  "gem",
+  "gems",
+  "gemCount",
+  "gemAmount",
+  "rewardGems",
+  "rewardGem",
+  "premiumGem",
+  "jewel",
+  "jewels",
+  "dia",
+  "diamond",
+  "diamonds",
+  "amount",
+  "rewardAmount",
+  "rewardValue",
+  "value",
+  "count",
+  "quantity",
+  "qty",
+] as const;
 
 const LOCALE_LOOKUP_ORDER: Record<Locale, string[]> = {
   en: ["en", "en-US", "english"],
@@ -50,6 +60,17 @@ const LOCALE_SUFFIX: Record<Locale, string[]> = {
   ru: ["Ru", "RU", "_ru", "-ru"],
 };
 
+function toPositiveNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() && !Number.isNaN(Number(value))) {
+    const parsed = Number(value);
+    return parsed > 0 ? parsed : null;
+  }
+  return null;
+}
+
 function hasRewardContent(value: unknown): boolean {
   if (value == null) {
     return false;
@@ -66,81 +87,200 @@ function hasRewardContent(value: unknown): boolean {
   return false;
 }
 
-function toPositiveNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
-    return value;
-  }
-  if (typeof value === "string" && value.trim() && !Number.isNaN(Number(value))) {
-    const parsed = Number(value);
-    return parsed > 0 ? parsed : null;
-  }
-  return null;
+function isGemLikeType(value: unknown): boolean {
+  return typeof value === "string" && /gem|jewel|dia|diamond|premium/i.test(value);
 }
 
-function buildCurrencyRewards(data: Record<string, unknown>): Record<string, number> {
-  const built: Record<string, number> = {};
-
-  for (const { source, target } of CURRENCY_FIELDS) {
-    const amount = toPositiveNumber(data[source]);
-    if (amount != null) {
-      built[target] = Math.max(built[target] ?? 0, amount);
-    }
-  }
-
-  return built;
-}
-
-function buildArrayGemReward(data: Record<string, unknown>): unknown[] | null {
-  const gemAmount =
-    toPositiveNumber(data.gem) ??
-    toPositiveNumber(data.gems) ??
-    toPositiveNumber(data.gemCount) ??
-    toPositiveNumber(data.rewardGems);
-
-  if (gemAmount == null) {
+function extractGemAmountFromObject(
+  data: Record<string, unknown>,
+  depth = 0,
+): number | null {
+  if (depth > 4) {
     return null;
   }
 
-  return [
-    {
-      type: "gem",
-      itemType: "gem",
-      itemId: "gem",
-      amount: gemAmount,
-      count: gemAmount,
-      quantity: gemAmount,
-      qty: gemAmount,
-    },
-  ];
-}
-
-export function extractCouponRewards(data: Record<string, unknown>): unknown {
-  for (const key of REWARD_CONTAINER_KEYS) {
-    const value = data[key];
-    if (hasRewardContent(value)) {
-      if (
-        typeof value === "object" &&
-        value !== null &&
-        !Array.isArray(value) &&
-        Object.keys(value as Record<string, unknown>).length === 0
-      ) {
-        continue;
-      }
-      return value;
+  for (const field of GEM_FIELD_NAMES) {
+    const amount = toPositiveNumber(data[field]);
+    if (amount != null) {
+      return amount;
     }
   }
 
-  const currencyRewards = buildCurrencyRewards(data);
-  if (Object.keys(currencyRewards).length > 0) {
-    return currencyRewards;
+  if (isGemLikeType(data.rewardType) || isGemLikeType(data.type) || isGemLikeType(data.itemType)) {
+    for (const field of GEM_FIELD_NAMES) {
+      const amount = toPositiveNumber(data[field]);
+      if (amount != null) {
+        return amount;
+      }
+    }
   }
 
-  const arrayReward = buildArrayGemReward(data);
-  if (arrayReward) {
-    return arrayReward;
+  for (const key of REWARD_CONTAINER_KEYS) {
+    const nested = data[key];
+    if (Array.isArray(nested)) {
+      for (const entry of nested) {
+        if (typeof entry === "object" && entry !== null) {
+          const amount = extractGemAmountFromObject(
+            entry as Record<string, unknown>,
+            depth + 1,
+          );
+          if (amount != null) {
+            return amount;
+          }
+        }
+      }
+    } else if (typeof nested === "object" && nested !== null) {
+      const amount = extractGemAmountFromObject(
+        nested as Record<string, unknown>,
+        depth + 1,
+      );
+      if (amount != null) {
+        return amount;
+      }
+    }
   }
 
-  return {};
+  return null;
+}
+
+export function extractGemAmount(data: Record<string, unknown>): number | null {
+  return extractGemAmountFromObject(data);
+}
+
+function cloneWithGemAmount(value: unknown, gemAmount: number): unknown {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return value;
+    }
+    return value.map((entry, index) =>
+      index === 0 && typeof entry === "object" && entry !== null
+        ? cloneWithGemAmount(entry, gemAmount)
+        : entry,
+    );
+  }
+
+  if (typeof value !== "object" || value === null) {
+    return value;
+  }
+
+  const source = value as Record<string, unknown>;
+  const cloned: Record<string, unknown> = { ...source };
+
+  for (const key of GEM_FIELD_NAMES) {
+    if (key in cloned && toPositiveNumber(cloned[key]) != null) {
+      cloned[key] = gemAmount;
+    }
+  }
+
+  for (const key of ["type", "itemType", "itemId", "rewardType", "rewardId", "id"]) {
+    if (typeof cloned[key] === "string" && isGemLikeType(cloned[key])) {
+      for (const amountKey of ["amount", "count", "quantity", "value", "qty"]) {
+        if (amountKey in cloned) {
+          cloned[amountKey] = gemAmount;
+        }
+      }
+    }
+  }
+
+  return cloned;
+}
+
+function buildRewardFieldsFromTemplate(
+  template: Record<string, unknown>,
+  gemAmount: number,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const key of REWARD_CONTAINER_KEYS) {
+    const value = template[key];
+    if (!hasRewardContent(value)) {
+      continue;
+    }
+    result[key] = cloneWithGemAmount(value, gemAmount);
+  }
+
+  for (const key of GEM_FIELD_NAMES) {
+    if (key in template && toPositiveNumber(template[key]) != null) {
+      result[key] = gemAmount;
+    }
+  }
+
+  if (typeof template.rewardType === "string") {
+    result.rewardType = template.rewardType;
+    if (result.rewardAmount == null) {
+      result.rewardAmount = gemAmount;
+    }
+    if (result.rewardValue == null) {
+      result.rewardValue = gemAmount;
+    }
+  }
+
+  return result;
+}
+
+function buildDefaultRewardFields(gemAmount: number): Record<string, unknown> {
+  return {
+    gem: gemAmount,
+    gems: gemAmount,
+    rewardType: "gem",
+    rewardAmount: gemAmount,
+    rewardValue: gemAmount,
+    rewards: [
+      {
+        type: "gem",
+        itemType: "gem",
+        itemId: "gem",
+        rewardType: "gem",
+        amount: gemAmount,
+        count: gemAmount,
+        quantity: gemAmount,
+        value: gemAmount,
+      },
+    ],
+    rewardList: [
+      {
+        type: "Gem",
+        rewardType: "Gem",
+        amount: gemAmount,
+        count: gemAmount,
+      },
+    ],
+    rewardItems: [
+      {
+        itemType: "gem",
+        itemId: "gem",
+        quantity: gemAmount,
+        count: gemAmount,
+      },
+    ],
+    items: [
+      {
+        type: "GEM",
+        id: "gem",
+        amount: gemAmount,
+        count: gemAmount,
+      },
+    ],
+  };
+}
+
+export function buildRewardFields(
+  couponData: Record<string, unknown>,
+  templateMail?: Record<string, unknown> | null,
+): Record<string, unknown> {
+  const gemAmount = extractGemAmount(couponData);
+  if (gemAmount == null) {
+    return {};
+  }
+
+  if (templateMail) {
+    const fromTemplate = buildRewardFieldsFromTemplate(templateMail, gemAmount);
+    if (Object.keys(fromTemplate).length > 0) {
+      return fromTemplate;
+    }
+  }
+
+  return buildDefaultRewardFields(gemAmount);
 }
 
 function resolveLocalizedMap(
@@ -164,16 +304,13 @@ function resolveLocalizedMap(
   return null;
 }
 
-function resolveLocalizedField(
+function resolveCouponLocalizedText(
   data: Record<string, unknown>,
   baseNames: string[],
   locale: Locale,
 ): string | null {
   for (const baseName of baseNames) {
     const value = data[baseName];
-    if (typeof value === "string" && value.trim()) {
-      return value.trim();
-    }
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       const localized = resolveLocalizedMap(value as Record<string, unknown>, locale);
       if (localized) {
@@ -200,89 +337,68 @@ export function resolveCouponLocale(value: unknown): Locale {
   return DEFAULT_LOCALE;
 }
 
+export function scoreMailboxRewardTemplate(
+  data: Record<string, unknown>,
+): number {
+  let score = 0;
+
+  for (const key of REWARD_CONTAINER_KEYS) {
+    if (hasRewardContent(data[key])) {
+      score += 10;
+    }
+  }
+
+  for (const key of GEM_FIELD_NAMES) {
+    if (toPositiveNumber(data[key]) != null) {
+      score += 5;
+    }
+  }
+
+  if (typeof data.rewardType === "string") {
+    score += 3;
+  }
+
+  if (data.source === "web_coupon") {
+    score -= 20;
+  }
+
+  return score;
+}
+
 export function buildMailboxPayload(
   couponData: Record<string, unknown>,
   couponCode: string,
   localeInput?: string,
+  templateMail?: Record<string, unknown> | null,
 ): Record<string, unknown> {
   const locale = resolveCouponLocale(localeInput);
   const dictionary = getDictionary(locale);
-  const rewards = extractCouponRewards(couponData);
+  const rewardFields = buildRewardFields(couponData, templateMail);
 
   const title =
-    resolveLocalizedField(couponData, ["title", "mailTitle", "subject"], locale) ??
-    dictionary.coupon.mailTitle;
+    resolveCouponLocalizedText(
+      couponData,
+      ["title", "mailTitle", "subject"],
+      locale,
+    ) ?? dictionary.coupon.mailTitle;
 
   const content =
-    resolveLocalizedField(
+    resolveCouponLocalizedText(
       couponData,
       ["content", "mailContent", "message", "body", "description", "desc"],
       locale,
     ) ?? dictionary.coupon.mailContent;
 
-  const payload: Record<string, unknown> = {
+  return {
     title,
     content,
     message: content,
     body: content,
     desc: content,
-    rewards,
+    ...rewardFields,
     isRead: false,
     source: "web_coupon",
     couponCode,
     locale,
   };
-
-  const currencyRewards = buildCurrencyRewards(couponData);
-  for (const [key, amount] of Object.entries(currencyRewards)) {
-    payload[key] = amount;
-  }
-
-  if (typeof rewards === "object" && rewards !== null && !Array.isArray(rewards)) {
-    for (const [key, amount] of Object.entries(rewards as Record<string, unknown>)) {
-      const numeric = toPositiveNumber(amount);
-      if (numeric != null) {
-        payload[key] = numeric;
-      }
-    }
-  }
-
-  const passthroughKeys = [
-    "rewardType",
-    "rewardAmount",
-    "rewardValue",
-    "rewardCount",
-    "type",
-    "amount",
-    "count",
-    "quantity",
-    "items",
-    "attachments",
-  ] as const;
-
-  for (const key of passthroughKeys) {
-    if (couponData[key] != null && payload[key] == null) {
-      payload[key] = couponData[key];
-    }
-  }
-
-  if (
-    typeof couponData.rewardType === "string" &&
-    payload.rewardAmount == null &&
-    payload.rewardValue == null
-  ) {
-    const amount =
-      toPositiveNumber(couponData.rewardAmount) ??
-      toPositiveNumber(couponData.rewardValue) ??
-      toPositiveNumber(couponData.amount) ??
-      toPositiveNumber(couponData.gem) ??
-      toPositiveNumber(couponData.gems);
-
-    if (amount != null) {
-      payload.rewardAmount = amount;
-      payload.rewardValue = amount;
-    }
-  }
-
-  return payload;
 }
