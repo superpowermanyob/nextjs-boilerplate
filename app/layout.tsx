@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { headers } from "next/headers";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
@@ -12,6 +13,8 @@ import {
 } from "@/lib/i18n/metadata";
 import { getHtmlLang } from "@/lib/i18n/locales";
 import "./globals.css";
+
+const ADSENSE_CLIENT = "ca-pub-3255200122193250";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +50,17 @@ export default async function RootLayout({
       lang={getHtmlLang(locale)}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+      </head>
       <body className="min-h-full flex flex-col">
+        <Script
+          id="google-adsense"
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <I18nProvider>
           <CouponShortcut />
           <LanguageSwitcher />
