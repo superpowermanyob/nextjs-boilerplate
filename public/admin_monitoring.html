@@ -55,18 +55,6 @@
         background: var(--panel);
       }
 
-      .auth-row {
-        display: grid;
-        gap: 12px;
-      }
-
-      @media (min-width: 640px) {
-        .auth-row {
-          grid-template-columns: 1fr auto;
-          align-items: end;
-        }
-      }
-
       label {
         display: block;
         margin-bottom: 8px;
@@ -74,7 +62,6 @@
         font-weight: 600;
       }
 
-      input,
       textarea,
       button {
         width: 100%;
@@ -85,7 +72,6 @@
         font: inherit;
       }
 
-      input,
       textarea {
         padding: 12px 14px;
       }
@@ -140,7 +126,6 @@
         background: #121216;
       }
 
-      input:focus,
       textarea:focus {
         outline: none;
         border-color: rgba(83, 131, 232, 0.65);
@@ -148,6 +133,7 @@
       }
 
       button {
+        margin-top: 20px;
         padding: 14px 16px;
         border: none;
         background: var(--accent);
@@ -164,11 +150,6 @@
         cursor: wait;
       }
 
-      .auth-row button {
-        width: auto;
-        min-width: 120px;
-      }
-
       .status {
         margin-top: 12px;
         min-height: 20px;
@@ -178,39 +159,12 @@
       .status.error {
         color: #fca5a5;
       }
-
-      .hint {
-        margin-top: 8px;
-        font-size: 12px;
-        color: #9aa0ae;
-      }
     </style>
   </head>
   <body>
     <main>
       <h1>Focus RPG Admin Monitoring</h1>
-      <p>
-        배포 환경에서는 Firestore Rules 때문에 브라우저 직접 저장이 차단됩니다.
-        서버 API(<code>/api/admin/banner</code>)를 통해 8개 언어 공지를 저장합니다.
-      </p>
-
-      <section>
-        <h2>관리자 인증</h2>
-        <div class="auth-row">
-          <div>
-            <label for="adminKey">Admin Key</label>
-            <input
-              id="adminKey"
-              type="password"
-              placeholder="Vercel의 ADMIN_BANNER_SECRET 값"
-              autocomplete="off"
-            />
-            <p class="hint">입력한 키는 이 브라우저 sessionStorage에만 저장됩니다.</p>
-          </div>
-          <button id="saveKeyBtn" type="button">키 저장</button>
-        </div>
-        <div id="authStatus" class="status"></div>
-      </section>
+      <p>8개 언어 패치노트 전광판을 수정합니다.</p>
 
       <section>
         <h2>패치노트 전광판 (8개 국어)</h2>
@@ -221,6 +175,8 @@
     </main>
 
     <script type="module">
+      const ADMIN_KEY = "my_secret_admin_key_123";
+
       const BANNER_LOCALES = [
         { code: "ko", flag: "🇰🇷", label: "한국어" },
         { code: "en", flag: "🇺🇸", label: "English" },
@@ -232,38 +188,15 @@
         { code: "ru", flag: "🇷🇺", label: "Русский" },
       ];
 
-      const ADMIN_KEY_STORAGE = "focus-rpg-admin-banner-key";
       const form = document.getElementById("bannerForm");
       const statusEl = document.getElementById("bannerStatus");
-      const authStatusEl = document.getElementById("authStatus");
       const updateBtn = document.getElementById("updateBannerBtn");
-      const adminKeyInput = document.getElementById("adminKey");
-      const saveKeyBtn = document.getElementById("saveKeyBtn");
+
+      sessionStorage.setItem("focus-rpg-admin-banner-key", ADMIN_KEY);
 
       function setStatus(message, isError = false) {
         statusEl.textContent = message;
         statusEl.classList.toggle("error", isError);
-      }
-
-      function setAuthStatus(message, isError = false) {
-        authStatusEl.textContent = message;
-        authStatusEl.classList.toggle("error", isError);
-      }
-
-      function getAdminKey() {
-        return sessionStorage.getItem(ADMIN_KEY_STORAGE) || "";
-      }
-
-      function saveAdminKey() {
-        const value = adminKeyInput.value.trim();
-        if (!value) {
-          setAuthStatus("Admin Key를 입력해 주세요.", true);
-          return;
-        }
-
-        sessionStorage.setItem(ADMIN_KEY_STORAGE, value);
-        adminKeyInput.value = "";
-        setAuthStatus("Admin Key가 저장되었습니다.");
       }
 
       function renderForm() {
@@ -304,16 +237,11 @@
       }
 
       async function apiFetch(path, options = {}) {
-        const adminKey = getAdminKey();
-        if (!adminKey) {
-          throw new Error("Admin Key가 없습니다. 상단에서 키를 저장해 주세요.");
-        }
-
         const response = await fetch(path, {
           ...options,
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${adminKey}`,
+            Authorization: `Bearer ${ADMIN_KEY}`,
             ...(options.headers || {}),
           },
         });
@@ -327,22 +255,9 @@
       }
 
       async function loadBanner() {
-        if (!getAdminKey()) {
-          setAuthStatus("Admin Key를 저장하면 기존 공지를 불러올 수 있습니다.", true);
-          return;
-        }
-
         const data = await apiFetch("/api/admin/banner");
         fillFormValues(data.messages || {});
-        setStatus("기존 공지를 불러왔습니다.");
       }
-
-      saveKeyBtn.addEventListener("click", () => {
-        saveAdminKey();
-        loadBanner().catch((error) => {
-          setStatus(error instanceof Error ? error.message : "불러오기 실패", true);
-        });
-      });
 
       updateBtn.addEventListener("click", async () => {
         const messages = readFormValues();
@@ -375,13 +290,9 @@
       });
 
       renderForm();
-
-      if (getAdminKey()) {
-        setAuthStatus("저장된 Admin Key가 있습니다.");
-        loadBanner().catch((error) => {
-          setStatus(error instanceof Error ? error.message : "불러오기 실패", true);
-        });
-      }
+      loadBanner().catch((error) => {
+        setStatus(error instanceof Error ? error.message : "불러오기 실패", true);
+      });
     </script>
   </body>
 </html>
