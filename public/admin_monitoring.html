@@ -36,8 +36,15 @@
         color: #fff;
       }
 
+      h2 {
+        margin: 0 0 16px;
+        color: #fff;
+        font-size: 1.125rem;
+      }
+
       p {
         color: #9aa0ae;
+        line-height: 1.6;
       }
 
       section {
@@ -48,34 +55,77 @@
         background: var(--panel);
       }
 
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 14px;
-        font-weight: 600;
+      .locale-grid {
+        display: grid;
+        gap: 16px;
       }
 
-      textarea,
-      button {
-        width: 100%;
-        border-radius: 12px;
+      @media (min-width: 640px) {
+        .locale-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .locale-card {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px;
         border: 1px solid var(--border);
+        border-radius: 14px;
         background: #1c1c1f;
+      }
+
+      .locale-card label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
         color: #fff;
-        font: inherit;
+      }
+
+      .locale-card .flag {
+        font-size: 1.25rem;
+        line-height: 1;
+      }
+
+      .locale-card .code {
+        margin-left: auto;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: #9aa0ae;
       }
 
       textarea {
+        width: 100%;
+        min-height: 96px;
         padding: 12px 14px;
-        min-height: 120px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #121216;
+        color: #fff;
+        font: inherit;
         resize: vertical;
       }
 
+      textarea:focus {
+        outline: none;
+        border-color: rgba(83, 131, 232, 0.65);
+        box-shadow: 0 0 0 3px rgba(83, 131, 232, 0.15);
+      }
+
       button {
-        margin-top: 12px;
-        padding: 12px 16px;
-        background: var(--accent);
+        width: 100%;
+        margin-top: 20px;
+        padding: 14px 16px;
         border: none;
+        border-radius: 12px;
+        background: var(--accent);
+        color: #fff;
+        font: inherit;
         font-weight: 700;
         cursor: pointer;
       }
@@ -84,25 +134,34 @@
         filter: brightness(1.08);
       }
 
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
       .status {
         margin-top: 12px;
         min-height: 20px;
         font-size: 14px;
+      }
+
+      .status.error {
+        color: #fca5a5;
       }
     </style>
   </head>
   <body>
     <main>
       <h1>Focus RPG Admin Monitoring</h1>
-      <p>Firestore `settings/banner` 문서를 수정해 메인 페이지 전광판을 업데이트합니다.</p>
+      <p>
+        Firestore <code>settings/banner</code> 문서에 8개 언어 공지를 저장합니다.
+        웹사이트 전광판은 유저가 선택한 언어에 맞는 텍스트를 표시하고, 비어 있으면
+        한국어(ko)로 대체합니다.
+      </p>
 
       <section>
-        <h2>패치노트 전광판</h2>
-        <label for="bannerText">배너 텍스트</label>
-        <textarea
-          id="bannerText"
-          placeholder="예: v1.2.0 업데이트: 신규 보스 층 추가, 밸런스 조정"
-        ></textarea>
+        <h2>패치노트 전광판 (8개 국어)</h2>
+        <form id="bannerForm" class="locale-grid"></form>
         <button id="updateBannerBtn" type="button">배너 업데이트</button>
         <div id="bannerStatus" class="status"></div>
       </section>
@@ -118,6 +177,19 @@
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
+      const BANNER_LOCALES = [
+        { code: "ko", flag: "🇰🇷", label: "한국어" },
+        { code: "en", flag: "🇺🇸", label: "English" },
+        { code: "ja", flag: "🇯🇵", label: "日本語" },
+        { code: "vi", flag: "🇻🇳", label: "Tiếng Việt" },
+        { code: "id", flag: "🇮🇩", label: "Bahasa Indonesia" },
+        { code: "zh-TW", flag: "🇹🇼", label: "繁體中文" },
+        { code: "zh-CN", flag: "🇨🇳", label: "简体中文" },
+        { code: "ru", flag: "🇷🇺", label: "Русский" },
+      ];
+
+      const LEGACY_TEXT_KEYS = ["text", "message", "content", "bannerText"];
+
       const firebaseConfig = {
         apiKey: "AIzaSyALVVWopHFZzOAd4wqfXQCJJMHNUMk0rd0",
         authDomain: "focusrpg-10da6.firebaseapp.com",
@@ -132,47 +204,116 @@
 
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
+      const bannerRef = doc(db, "settings", "banner");
+      const form = document.getElementById("bannerForm");
+      const statusEl = document.getElementById("bannerStatus");
+      const updateBtn = document.getElementById("updateBannerBtn");
+
+      function setStatus(message, isError = false) {
+        statusEl.textContent = message;
+        statusEl.classList.toggle("error", isError);
+      }
+
+      function renderForm() {
+        form.innerHTML = BANNER_LOCALES.map(
+          ({ code, flag, label }) => `
+            <div class="locale-card">
+              <label for="banner-${code}">
+                <span class="flag">${flag}</span>
+                <span>${label}</span>
+                <span class="code">${code}</span>
+              </label>
+              <textarea
+                id="banner-${code}"
+                name="${code}"
+                placeholder="${label} 공지를 입력하세요"
+              ></textarea>
+            </div>
+          `,
+        ).join("");
+      }
+
+      function readFormValues() {
+        return Object.fromEntries(
+          BANNER_LOCALES.map(({ code }) => {
+            const field = document.getElementById(`banner-${code}`);
+            return [code, field instanceof HTMLTextAreaElement ? field.value.trim() : ""];
+          }),
+        );
+      }
+
+      function fillFormValues(data) {
+        const legacyText = LEGACY_TEXT_KEYS.map((key) => data[key]).find(
+          (value) => typeof value === "string" && value.trim(),
+        );
+
+        for (const { code } of BANNER_LOCALES) {
+          const field = document.getElementById(`banner-${code}`);
+          if (!(field instanceof HTMLTextAreaElement)) {
+            continue;
+          }
+
+          const value = typeof data[code] === "string" ? data[code].trim() : "";
+          if (value) {
+            field.value = value;
+            continue;
+          }
+
+          if (code === "ko" && typeof legacyText === "string") {
+            field.value = legacyText.trim();
+          }
+        }
+      }
 
       async function loadBanner() {
-        const snapshot = await getDoc(doc(db, "settings", "banner"));
+        const snapshot = await getDoc(bannerRef);
         if (!snapshot.exists()) {
           return;
         }
 
-        const data = snapshot.data();
-        document.getElementById("bannerText").value =
-          data.text || data.message || data.content || "";
+        fillFormValues(snapshot.data());
       }
 
-      document.getElementById("updateBannerBtn").addEventListener("click", async () => {
-        const status = document.getElementById("bannerStatus");
-        const text = document.getElementById("bannerText").value.trim();
+      updateBtn.addEventListener("click", async () => {
+        const messages = readFormValues();
+        const hasAnyMessage = Object.values(messages).some(Boolean);
 
-        if (!text) {
-          status.textContent = "배너 텍스트를 입력해 주세요.";
+        if (!hasAnyMessage) {
+          setStatus("최소 1개 언어의 공지를 입력해 주세요.", true);
           return;
         }
 
+        updateBtn.disabled = true;
+        setStatus("저장 중...");
+
         try {
           await setDoc(
-            doc(db, "settings", "banner"),
+            bannerRef,
             {
-              text,
+              ...messages,
               enabled: true,
               updatedAt: serverTimestamp(),
             },
             { merge: true },
           );
-          status.textContent = "배너가 업데이트되었습니다.";
+
+          setStatus("");
+          alert("업데이트 성공!");
         } catch (error) {
-          status.textContent =
+          const message =
             error instanceof Error ? error.message : "배너 업데이트에 실패했습니다.";
+          setStatus(message, true);
+          alert(`업데이트 실패: ${message}`);
+        } finally {
+          updateBtn.disabled = false;
         }
       });
 
+      renderForm();
       loadBanner().catch((error) => {
-        document.getElementById("bannerStatus").textContent =
+        const message =
           error instanceof Error ? error.message : "배너를 불러오지 못했습니다.";
+        setStatus(message, true);
       });
     </script>
   </body>

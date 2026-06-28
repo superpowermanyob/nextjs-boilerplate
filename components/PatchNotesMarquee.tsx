@@ -5,21 +5,15 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { Megaphone } from "lucide-react";
 
 import { useI18n } from "@/components/I18nProvider";
+import { resolveBannerText } from "@/lib/banner-text";
 import { getClientFirestore } from "@/lib/firebase";
 
-function pickBannerText(data: Record<string, unknown>): string {
-  for (const key of ["text", "message", "content", "bannerText"]) {
-    const value = data[key];
-    if (typeof value === "string" && value.trim()) {
-      return value.trim();
-    }
-  }
-  return "";
-}
-
 export function PatchNotesMarquee() {
-  const { t } = useI18n();
-  const [text, setText] = useState<string | null>(null);
+  const { locale, t } = useI18n();
+  const [bannerData, setBannerData] = useState<Record<string, unknown> | null>(
+    null,
+  );
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     const db = getClientFirestore();
@@ -29,22 +23,25 @@ export function PatchNotesMarquee() {
       bannerRef,
       (snapshot) => {
         if (!snapshot.exists()) {
-          setText(null);
+          setBannerData(null);
+          setEnabled(true);
           return;
         }
 
         const data = snapshot.data() as Record<string, unknown>;
-        const enabled = typeof data.enabled === "boolean" ? data.enabled : true;
-        const bannerText = pickBannerText(data);
-        setText(enabled && bannerText ? bannerText : null);
+        setBannerData(data);
+        setEnabled(typeof data.enabled === "boolean" ? data.enabled : true);
       },
       () => {
-        setText(null);
+        setBannerData(null);
+        setEnabled(true);
       },
     );
 
     return () => unsubscribe();
   }, []);
+
+  const text = enabled ? resolveBannerText(bannerData, locale) : "";
 
   if (!text) {
     return null;
