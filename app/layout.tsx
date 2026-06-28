@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import {
+  buildRootMetadata,
+  resolveLocaleFromAcceptLanguage,
+} from "@/lib/i18n/metadata";
+import { getHtmlLang } from "@/lib/i18n/locales";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,19 +22,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Focus RPG | Stats · Rankings",
-  description: "Search Focus RPG player stats and browse live ranking boards.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers();
+  const locale = resolveLocaleFromAcceptLanguage(
+    headersList.get("accept-language"),
+  );
 
-export default function RootLayout({
+  return buildRootMetadata(locale);
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const locale = resolveLocaleFromAcceptLanguage(
+    headersList.get("accept-language"),
+  );
+
   return (
     <html
-      lang="en"
+      lang={getHtmlLang(locale)}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

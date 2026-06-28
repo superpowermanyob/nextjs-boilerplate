@@ -55,7 +55,6 @@
         font-weight: 600;
       }
 
-      input,
       textarea,
       button {
         width: 100%;
@@ -66,12 +65,8 @@
         font: inherit;
       }
 
-      input,
       textarea {
         padding: 12px 14px;
-      }
-
-      textarea {
         min-height: 120px;
         resize: vertical;
       }
@@ -94,37 +89,12 @@
         min-height: 20px;
         font-size: 14px;
       }
-
-      .grid {
-        display: grid;
-        gap: 12px;
-      }
     </style>
   </head>
   <body>
     <main>
       <h1>Focus RPG Admin Monitoring</h1>
       <p>Firestore `settings/banner` 문서를 수정해 메인 페이지 전광판을 업데이트합니다.</p>
-
-      <section>
-        <h2>Firebase 설정</h2>
-        <div class="grid">
-          <div>
-            <label for="apiKey">API Key</label>
-            <input id="apiKey" type="text" placeholder="NEXT_PUBLIC_FIREBASE_API_KEY" />
-          </div>
-          <div>
-            <label for="projectId">Project ID</label>
-            <input id="projectId" type="text" placeholder="NEXT_PUBLIC_FIREBASE_PROJECT_ID" />
-          </div>
-          <div>
-            <label for="appId">App ID</label>
-            <input id="appId" type="text" placeholder="NEXT_PUBLIC_FIREBASE_APP_ID" />
-          </div>
-        </div>
-        <button id="saveConfigBtn" type="button">Firebase 설정 저장</button>
-        <div id="configStatus" class="status"></div>
-      </section>
 
       <section>
         <h2>패치노트 전광판</h2>
@@ -148,48 +118,22 @@
         serverTimestamp,
       } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-      const CONFIG_KEY = "focus-rpg-admin-firebase-config";
-      const fields = ["apiKey", "projectId", "appId"];
+      const firebaseConfig = {
+        apiKey: "AIzaSyALVVWopHFZzOAd4wqfXQCJJMHNUMk0rd0",
+        authDomain: "focusrpg-10da6.firebaseapp.com",
+        databaseURL:
+          "https://focusrpg-10da6-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "focusrpg-10da6",
+        storageBucket: "focusrpg-10da6.firebasestorage.app",
+        messagingSenderId: "666978949137",
+        appId: "1:666978949137:web:b8946689cd8b287b9df9b0",
+        measurementId: "G-K25TTT9PVC",
+      };
 
-      function readConfig() {
-        try {
-          return JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
-        } catch {
-          return {};
-        }
-      }
-
-      function saveConfig() {
-        const config = Object.fromEntries(
-          fields.map((field) => [field, document.getElementById(field).value.trim()]),
-        );
-        localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-        return config;
-      }
-
-      function fillConfigForm(config) {
-        fields.forEach((field) => {
-          document.getElementById(field).value = config[field] || "";
-        });
-      }
-
-      function getFirebaseApp() {
-        const config = readConfig();
-        if (!config.apiKey || !config.projectId || !config.appId) {
-          throw new Error("Firebase 설정을 먼저 저장해 주세요.");
-        }
-
-        return initializeApp({
-          apiKey: config.apiKey,
-          authDomain: `${config.projectId}.firebaseapp.com`,
-          projectId: config.projectId,
-          appId: config.appId,
-        });
-      }
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
       async function loadBanner() {
-        const app = getFirebaseApp();
-        const db = getFirestore(app);
         const snapshot = await getDoc(doc(db, "settings", "banner"));
         if (!snapshot.exists()) {
           return;
@@ -199,14 +143,6 @@
         document.getElementById("bannerText").value =
           data.text || data.message || data.content || "";
       }
-
-      document.getElementById("saveConfigBtn").addEventListener("click", () => {
-        const config = saveConfig();
-        document.getElementById("configStatus").textContent =
-          config.apiKey && config.projectId && config.appId
-            ? "Firebase 설정이 저장되었습니다."
-            : "모든 Firebase 설정 값을 입력해 주세요.";
-      });
 
       document.getElementById("updateBannerBtn").addEventListener("click", async () => {
         const status = document.getElementById("bannerStatus");
@@ -218,8 +154,6 @@
         }
 
         try {
-          const app = getFirebaseApp();
-          const db = getFirestore(app);
           await setDoc(
             doc(db, "settings", "banner"),
             {
@@ -236,7 +170,6 @@
         }
       });
 
-      fillConfigForm(readConfig());
       loadBanner().catch((error) => {
         document.getElementById("bannerStatus").textContent =
           error instanceof Error ? error.message : "배너를 불러오지 못했습니다.";

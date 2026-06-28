@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | 战绩 · 排行榜",
-    "description": "搜索 Focus RPG 玩家战绩并查看实时排行榜。",
+    "title": "FOCUS RPG - 战绩 & 排行榜搜索",
+    "description": "查看 Focus RPG 玩家实时战绩、公会排行榜和试炼之塔最高层记录。",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Focus RPG 战绩",
     "userDescription": "{nickname} 的详细战绩、装备与称号信息。"
   },
@@ -130,8 +131,8 @@
     "clearRecent": "清空"
   },
   "countdown": {
-    "label": "每周排行重置",
-    "resetIn": "距离重置还有 {days} 天 {time}"
+    "label": "每周专注排行 ({weekId})",
+    "resetIn": "距离重置还有 {days} 天 {time} (UTC 周一 00:00)"
   },
   "banner": {
     "patchNotes": "更新公告"

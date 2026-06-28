@@ -35,6 +35,7 @@ export default function Home() {
   const [guildRankings, setGuildRankings] = useState<GuildRankingEntry[]>([]);
   const [rankingLoading, setRankingLoading] = useState(true);
   const [rankingError, setRankingError] = useState<string | null>(null);
+  const [weeklyWeekId, setWeeklyWeekId] = useState<string | undefined>();
 
   const fetchRankings = useCallback(
     async (type: RankingType) => {
@@ -55,9 +56,11 @@ export default function Home() {
         if (type === "guild") {
           setGuildRankings(data.guildRankings ?? []);
           setRankings([]);
+          setWeeklyWeekId(undefined);
         } else {
           setRankings(data.rankings);
           setGuildRankings([]);
+          setWeeklyWeekId(type === "weeklyFocus" ? data.weekId : undefined);
         }
       } catch {
         setRankingError(t.errors.network);
@@ -123,7 +126,9 @@ export default function Home() {
 
           <RankingTabBar activeTab={activeTab} onTabChange={handleTabChange} />
 
-          {activeTab === "weeklyFocus" && <WeeklyResetCountdown />}
+          {activeTab === "weeklyFocus" && (
+            <WeeklyResetCountdown weekId={weeklyWeekId} />
+          )}
 
           {rankingError && (
             <div

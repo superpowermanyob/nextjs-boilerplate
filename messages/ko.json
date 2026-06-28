@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | 전적 · 랭킹",
-    "description": "Focus RPG 플레이어 전적 검색 및 랭킹 보드",
+    "title": "FOCUS RPG - 전적 & 랭킹 검색",
+    "description": "Focus RPG 유저들의 실시간 전적, 길드 랭킹, 시련의 탑 최고층 기록을 확인하세요.",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Focus RPG 전적",
     "userDescription": "{nickname} 플레이어의 상세 전적, 장비, 칭호 정보"
   },
@@ -130,8 +131,8 @@
     "clearRecent": "전체 삭제"
   },
   "countdown": {
-    "label": "주간 랭킹 초기화",
-    "resetIn": "초기화까지 {days}일 {time} 남음"
+    "label": "주간 집중 랭킹 ({weekId})",
+    "resetIn": "초기화까지 {days}일 {time} (UTC 월요일 00:00)"
   },
   "banner": {
     "patchNotes": "패치노트"

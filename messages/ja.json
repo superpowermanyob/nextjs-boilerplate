@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | 戦績 · ランキング",
-    "description": "Focus RPG のプレイヤー戦績検索とランキングボード",
+    "title": "FOCUS RPG - 戦績 & ランキング検索",
+    "description": "Focus RPGユーザーのリアルタイム戦績、ギルドランキング、試練の塔最高階記録を確認できます。",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Focus RPG 戦績",
     "userDescription": "{nickname} の詳細戦績、装備、称号情報"
   },
@@ -130,8 +131,8 @@
     "clearRecent": "履歴を削除"
   },
   "countdown": {
-    "label": "週間ランキングリセット",
-    "resetIn": "リセットまで {days}日 {time}"
+    "label": "週間集中ランキング ({weekId})",
+    "resetIn": "リセットまで {days}日 {time} (UTC月曜 00:00)"
   },
   "banner": {
     "patchNotes": "パッチノート"

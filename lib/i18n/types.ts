@@ -2,6 +2,7 @@ export type Dictionary = {
   meta: {
     title: string;
     description: string;
+    siteName: string;
     userTitle: string;
     userDescription: string;
   };

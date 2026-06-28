@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | Статистика · Рейтинг",
-    "description": "Поиск статистики игроков Focus RPG и таблицы рейтингов в реальном времени.",
+    "title": "FOCUS RPG - Поиск статистики и рейтинга",
+    "description": "Смотрите статистику игроков Focus RPG в реальном времени, рейтинг гильдий и рекорды высочайших этажей Башни Испытаний.",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Статистика Focus RPG",
     "userDescription": "Подробная статистика, экипировка и титулы игрока {nickname}."
   },
@@ -130,8 +131,8 @@
     "clearRecent": "Очистить"
   },
   "countdown": {
-    "label": "Сброс недельного рейтинга",
-    "resetIn": "До сброса: {days} д. {time}"
+    "label": "Недельный фокус ({weekId})",
+    "resetIn": "До сброса: {days} д. {time} (Пн 00:00 UTC)"
   },
   "banner": {
     "patchNotes": "Патч-ноут"

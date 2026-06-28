@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getGuildRankings } from "@/lib/guild-rankings";
-import { getRankings } from "@/lib/rankings";
+import { getRankings, getWeeklyFocusRankings } from "@/lib/rankings";
 import type { RankingType } from "@/lib/ranking-types";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +37,11 @@ export async function GET(request: NextRequest) {
     if (type === "guild") {
       const guildRankings = await getGuildRankings();
       return NextResponse.json({ type, rankings: [], guildRankings });
+    }
+
+    if (type === "weeklyFocus") {
+      const { weekId, rankings } = await getWeeklyFocusRankings();
+      return NextResponse.json({ type, weekId, rankings });
     }
 
     const rankings = await getRankings(type);

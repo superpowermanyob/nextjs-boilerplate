@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | Thành tích · Xếp hạng",
-    "description": "Tra cứu thành tích người chơi Focus RPG và bảng xếp hạng trực tiếp.",
+    "title": "FOCUS RPG - Tra cứu thành tích & xếp hạng",
+    "description": "Xem thành tích thời gian thực, bảng xếp hạng guild và kỷ lục tầng cao nhất Tháp Thử Thách của Focus RPG.",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Thành tích Focus RPG",
     "userDescription": "Thành tích chi tiết, trang bị và danh hiệu của {nickname}."
   },
@@ -130,8 +131,8 @@
     "clearRecent": "Xóa"
   },
   "countdown": {
-    "label": "Đặt lại xếp hạng tuần",
-    "resetIn": "Còn {days} ngày {time} để đặt lại"
+    "label": "Xếp hạng tập trung tuần ({weekId})",
+    "resetIn": "Còn {days} ngày {time} (T2 00:00 UTC)"
   },
   "banner": {
     "patchNotes": "Ghi chú bản vá"

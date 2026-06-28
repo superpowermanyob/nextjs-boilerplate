@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | Stats · Rankings",
-    "description": "Search Focus RPG player stats and browse live ranking boards.",
+    "title": "FOCUS RPG - Stats & Ranking Search",
+    "description": "Check real-time Focus RPG player stats, guild rankings, and Trial Tower highest floor records.",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Focus RPG Stats",
     "userDescription": "Detailed stats, gear, and titles for {nickname}."
   },
@@ -130,8 +131,8 @@
     "clearRecent": "Clear"
   },
   "countdown": {
-    "label": "Weekly ranking reset",
-    "resetIn": "Reset in {days}d {time}"
+    "label": "Weekly Focus ({weekId})",
+    "resetIn": "Reset in {days}d {time} (Mon 00:00 UTC)"
   },
   "banner": {
     "patchNotes": "Patch Notes"

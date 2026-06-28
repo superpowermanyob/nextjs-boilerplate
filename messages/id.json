@@ -1,7 +1,8 @@
 {
   "meta": {
-    "title": "Focus RPG | Statistik · Peringkat",
-    "description": "Cari statistik pemain Focus RPG dan lihat papan peringkat langsung.",
+    "title": "FOCUS RPG - Pencarian Statistik & Peringkat",
+    "description": "Lihat statistik pemain Focus RPG secara real-time, peringkat guild, dan rekor lantai tertinggi Trial Tower.",
+    "siteName": "FOCUS RPG",
     "userTitle": "{nickname} | Statistik Focus RPG",
     "userDescription": "Statistik detail, gear, dan gelar untuk {nickname}."
   },
@@ -130,8 +131,8 @@
     "clearRecent": "Hapus"
   },
   "countdown": {
-    "label": "Reset peringkat mingguan",
-    "resetIn": "Reset dalam {days} hari {time}"
+    "label": "Peringkat fokus mingguan ({weekId})",
+    "resetIn": "Reset dalam {days} hari {time} (Sen 00:00 UTC)"
   },
   "banner": {
     "patchNotes": "Catatan Patch"
