@@ -12,10 +12,13 @@ import {
   Swords,
 } from "lucide-react";
 
+import { useI18n } from "@/components/I18nProvider";
 import {
   extractEquipment,
   extractTitles,
-  formatNumber,
+  formatEquipmentOption,
+  formatRarity,
+  getEquipmentSlotLabel,
   getRarityColorClass,
   pickNumber,
   pickString,
@@ -48,6 +51,8 @@ function SectionPlaceholder({
 }
 
 export function UserDetailView({ profile }: UserDetailViewProps) {
+  const { t, formatNumber } = useI18n();
+
   const level = pickNumber(profile, ["level", "lv", "playerLevel"]);
   const combatPower = pickNumber(profile, ["combatPower", "power", "totalPower"]);
   const highestFloor = pickNumber(profile, ["highestFloor", "maxFloor", "bestFloor"]);
@@ -56,11 +61,14 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
   const { activeTitle, ownedTitles } = extractTitles(profile);
 
   const stats = [
-    { label: "레벨", value: formatNumber(level), icon: Sparkles },
-    { label: "전투력", value: formatNumber(combatPower), icon: Swords },
+    { label: t.common.level, value: formatNumber(level ?? 0), icon: Sparkles },
+    { label: t.common.combatPower, value: formatNumber(Math.round(combatPower ?? 0)), icon: Swords },
     {
-      label: "최고 층수",
-      value: highestFloor !== null ? `${formatNumber(highestFloor)}F` : "—",
+      label: t.common.highestFloor,
+      value:
+        highestFloor !== null
+          ? `${formatNumber(highestFloor)}${t.common.floorUnit}`
+          : "—",
       icon: Shield,
     },
   ];
@@ -75,7 +83,7 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
           className="mb-6 inline-flex items-center gap-2 text-sm text-[#9aa0ae] transition hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
-          랭킹으로 돌아가기
+          {t.user.backToRanking}
         </Link>
 
         <section className="overflow-hidden rounded-2xl border border-[#3d3d4a] bg-[#282830] shadow-2xl shadow-black/40">
@@ -88,13 +96,15 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5383e8]">
-                    Player Profile
+                    {t.common.playerProfile}
                   </p>
                   <h1 className="text-3xl font-bold text-white sm:text-4xl">
                     {profile.nickname}
                   </h1>
                   {guildName !== "—" && (
-                    <p className="mt-1 text-sm text-[#9aa0ae]">길드 · {guildName}</p>
+                    <p className="mt-1 text-sm text-[#9aa0ae]">
+                      {t.user.guildPrefix} · {guildName}
+                    </p>
                   )}
                 </div>
               </div>
@@ -120,13 +130,15 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
         <section className="mt-6 overflow-hidden rounded-2xl border border-[#5383e8]/30 bg-gradient-to-br from-[#1a2744]/80 via-[#282830] to-[#282830] p-5 sm:p-8">
           <div className="mb-4 flex items-center gap-2">
             <Award className="h-6 w-6 text-[#f5c451]" />
-            <h2 className="text-xl font-bold text-white">명예 칭호</h2>
+            <h2 className="text-xl font-bold text-white">{t.user.honorTitle}</h2>
           </div>
 
           <div className="rounded-xl border border-[#f5c451]/40 bg-[#f5c451]/10 px-5 py-4">
-            <p className="text-xs uppercase tracking-wider text-[#f5c451]">장착 중</p>
+            <p className="text-xs uppercase tracking-wider text-[#f5c451]">
+              {t.user.equippedTitle}
+            </p>
             <p className="mt-1 text-2xl font-bold text-white">
-              {activeTitle || "칭호 없음"}
+              {activeTitle || t.user.noTitle}
             </p>
           </div>
 
@@ -145,98 +157,108 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
         </section>
 
         <section className="mt-6">
-          <h2 className="mb-4 text-xl font-bold text-white">장착 장비</h2>
+          <h2 className="mb-4 text-xl font-bold text-white">{t.user.equipment}</h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            {equipment.map((item) => (
-              <article
-                key={item.slot}
-                className={`rounded-2xl border bg-[#282830] p-5 ${
-                  item.empty
-                    ? "border-[#3d3d4a] opacity-70"
-                    : `border-[#3d3d4a] ${getRarityColorClass(item.rarity).split(" ")[0]}`
-                }`}
-              >
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[#5383e8]">
-                      {item.slot}
-                    </p>
-                    <h3 className="mt-1 text-lg font-bold text-white">{item.name}</h3>
-                    {item.nameEn && item.nameEn !== item.name && (
-                      <p className="text-sm text-[#9aa0ae]">{item.nameEn}</p>
-                    )}
-                  </div>
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] text-[#5383e8]">
-                    <Swords className="h-4 w-4" />
-                  </div>
-                </div>
+            {equipment.map((item) => {
+              const slotLabel = getEquipmentSlotLabel(item.slotKey, t.equipment);
+              const displayName = item.empty || !item.name ? t.equipment.unequipped : item.name;
+              const subOptions = item.options.map((option) =>
+                formatEquipmentOption(option, t.stats),
+              );
 
-                {!item.empty && (
-                  <>
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${getRarityColorClass(item.rarity)}`}
-                      >
-                        {item.rarityLabel}
-                      </span>
-                      <span className="rounded-full border border-[#3d3d4a] bg-[#1c1c1f] px-2.5 py-1 text-xs text-[#cdd2dc]">
-                        +{item.enhancementLevel} 강화
-                      </span>
-                    </div>
-
-                    {item.prefixes.length > 0 && (
-                      <div className="mb-3">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae]">
-                          접두사
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {item.prefixes.map((prefix) => (
-                            <span
-                              key={prefix}
-                              className="rounded-lg border border-[#5383e8]/30 bg-[#5383e8]/10 px-2.5 py-1 text-sm font-medium text-[#9eb8ff]"
-                            >
-                              {prefix}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
+              return (
+                <article
+                  key={item.slotKey}
+                  className={`rounded-2xl border bg-[#282830] p-5 ${
+                    item.empty
+                      ? "border-[#3d3d4a] opacity-70"
+                      : `border-[#3d3d4a] ${getRarityColorClass(item.rarity).split(" ")[0]}`
+                  }`}
+                >
+                  <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae]">
-                        부옵션
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[#5383e8]">
+                        {slotLabel}
                       </p>
-                      {item.subOptions.length > 0 ? (
-                        <ul className="space-y-2">
-                          {item.subOptions.map((option, index) => (
-                            <li
-                              key={`${item.slot}-${index}`}
-                              className="rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] px-3 py-2 text-sm text-[#cdd2dc]"
-                            >
-                              {option}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-[#6b7280]">부옵션 없음</p>
+                      <h3 className="mt-1 text-lg font-bold text-white">{displayName}</h3>
+                      {item.nameEn && item.nameEn !== item.name && (
+                        <p className="text-sm text-[#9aa0ae]">{item.nameEn}</p>
                       )}
                     </div>
-                  </>
-                )}
-              </article>
-            ))}
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] text-[#5383e8]">
+                      <Swords className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  {!item.empty && (
+                    <>
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {item.rarity && (
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${getRarityColorClass(item.rarity)}`}
+                          >
+                            {formatRarity(item.rarity, t.rarity)}
+                          </span>
+                        )}
+                        <span className="rounded-full border border-[#3d3d4a] bg-[#1c1c1f] px-2.5 py-1 text-xs text-[#cdd2dc]">
+                          +{item.enhancementLevel} {t.common.enhance}
+                        </span>
+                      </div>
+
+                      {item.prefixes.length > 0 && (
+                        <div className="mb-3">
+                          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae]">
+                            {t.user.prefix}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {item.prefixes.map((prefix) => (
+                              <span
+                                key={prefix}
+                                className="rounded-lg border border-[#5383e8]/30 bg-[#5383e8]/10 px-2.5 py-1 text-sm font-medium text-[#9eb8ff]"
+                              >
+                                {prefix}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae]">
+                          {t.user.subOption}
+                        </p>
+                        {subOptions.length > 0 ? (
+                          <ul className="space-y-2">
+                            {subOptions.map((option, index) => (
+                              <li
+                                key={`${item.slotKey}-${index}`}
+                                className="rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] px-3 py-2 text-sm text-[#cdd2dc]"
+                              >
+                                {option}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-[#6b7280]">{t.user.noSubOption}</p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </section>
 
         <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <SectionPlaceholder
-            title="층수 히스토리"
-            description="향후 시즌별 최고층 추이 그래프가 이 영역에 표시됩니다."
+            title={t.user.historyTitle}
+            description={t.user.historyDescription}
             icon={BarChart3}
           />
           <SectionPlaceholder
-            title="스킬 트리"
-            description="향후 스탯 업그레이드 및 스킬 분기 정보가 이 영역에 표시됩니다."
+            title={t.user.skillTitle}
+            description={t.user.skillDescription}
             icon={GitBranch}
           />
         </section>

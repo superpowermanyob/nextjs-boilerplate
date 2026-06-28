@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
+import { I18nProvider } from "@/components/I18nProvider";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Focus RPG | 전적 · 랭킹",
-  description: "Focus RPG 플레이어 전적 검색 및 랭킹 보드",
+  title: "Focus RPG | Stats · Rankings",
+  description: "Search Focus RPG player stats and browse live ranking boards.",
 };
 
 export default function RootLayout({
@@ -26,12 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="ko"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <CommunityWidget />
+        <I18nProvider>
+          <LanguageSwitcher />
+          {children}
+          <CommunityWidget />
+        </I18nProvider>
       </body>
     </html>
   );

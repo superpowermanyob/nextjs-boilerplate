@@ -2,49 +2,42 @@
 
 import Link from "next/link";
 import {
+  Castle,
   Crown,
   Medal,
   Shield,
   Sparkles,
+  Swords,
+  Timer,
   Trophy,
 } from "lucide-react";
 
-import { RANKING_TABS } from "@/components/RankingTabBar";
+import { useI18n } from "@/components/I18nProvider";
 import { getUserProfilePath } from "@/lib/profile-utils";
 import type { RankingEntry, RankingType } from "@/lib/ranking-types";
 
-function formatNumber(value: number): string {
-  return value.toLocaleString("ko-KR");
-}
+const TAB_ICONS = {
+  highestFloor: Castle,
+  weeklyFocus: Timer,
+  combatPower: Swords,
+  guild: Shield,
+} as const;
 
-function formatFocusTime(minutes: number): string {
-  if (minutes >= 60) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}시간 ${mins}분` : `${hours}시간`;
-  }
-  return `${formatNumber(minutes)}분`;
-}
-
-function getMetricValue(entry: RankingEntry, type: RankingType): string {
-  switch (type) {
-    case "highestFloor":
-      return `${formatNumber(entry.highestFloor)}F`;
-    case "weeklyFocus":
-      return formatFocusTime(entry.focusTime);
-    case "combatPower":
-      return formatNumber(Math.round(entry.combatPower));
-    default:
-      return "—";
-  }
-}
+const METRIC_KEYS = {
+  highestFloor: "metricHighestFloor",
+  weeklyFocus: "metricFocusTime",
+  combatPower: "metricCombatPower",
+  guild: "metricGuild",
+} as const;
 
 function AvatarPlaceholder({ rank }: { rank: number }) {
+  const { t } = useI18n();
+
   return (
     <div
       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] text-[#5383e8]"
       aria-hidden="true"
-      title="캐릭터 썸네일 Placeholder"
+      title={t.ranking.avatarPlaceholder}
     >
       {rank <= 3 ? (
         <Crown className="h-4 w-4" />
@@ -88,8 +81,17 @@ function PodiumCard({
   type: RankingType;
   place: 1 | 2 | 3;
 }) {
+  const { t, formatFocusTime, formatNumber } = useI18n();
   const style = PODIUM_STYLES[place];
-  const TabIcon = RANKING_TABS.find((tab) => tab.id === type)?.icon ?? Trophy;
+  const TabIcon = TAB_ICONS[type as keyof typeof TAB_ICONS] ?? Trophy;
+  const metricKey = METRIC_KEYS[type as keyof typeof METRIC_KEYS];
+
+  const metricValue =
+    type === "highestFloor"
+      ? `${formatNumber(entry.highestFloor)}${t.common.floorUnit}`
+      : type === "weeklyFocus"
+        ? formatFocusTime(entry.focusTime)
+        : formatNumber(Math.round(entry.combatPower));
 
   return (
     <Link
@@ -110,33 +112,34 @@ function PodiumCard({
         <h3 className="truncate text-lg font-bold text-white sm:text-xl">
           {entry.nickname}
         </h3>
-        <p className="mt-1 text-sm text-[#9aa0ae]">Lv. {formatNumber(entry.level)}</p>
+        <p className="mt-1 text-sm text-[#9aa0ae]">
+          {t.common.level}. {formatNumber(entry.level)}
+        </p>
 
         <div className="mt-4 rounded-xl border border-[#3d3d4a]/80 bg-[#1c1c1f]/70 p-3">
           <div className="flex items-center gap-2 text-xs text-[#9aa0ae]">
             <TabIcon className="h-4 w-4 text-[#5383e8]" />
-            {RANKING_TABS.find((tab) => tab.id === type)?.metricLabel}
+            {t.tabs[metricKey]}
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-white">
-            {getMetricValue(entry, type)}
-          </p>
+          <p className="mt-1 text-2xl font-bold tabular-nums text-white">{metricValue}</p>
         </div>
 
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
           <div className="rounded-lg bg-[#1c1c1f]/60 px-2 py-2">
-            <p className="text-[#6b7280]">층수</p>
+            <p className="text-[#6b7280]">{t.ranking.floor}</p>
             <p className="mt-0.5 font-semibold text-[#cdd2dc]">
-              {formatNumber(entry.highestFloor)}F
+              {formatNumber(entry.highestFloor)}
+              {t.common.floorUnit}
             </p>
           </div>
           <div className="rounded-lg bg-[#1c1c1f]/60 px-2 py-2">
-            <p className="text-[#6b7280]">집중</p>
+            <p className="text-[#6b7280]">{t.ranking.focus}</p>
             <p className="mt-0.5 font-semibold text-[#cdd2dc]">
               {formatFocusTime(entry.focusTime)}
             </p>
           </div>
           <div className="rounded-lg bg-[#1c1c1f]/60 px-2 py-2">
-            <p className="text-[#6b7280]">전투력</p>
+            <p className="text-[#6b7280]">{t.ranking.power}</p>
             <p className="mt-0.5 font-semibold text-[#cdd2dc]">
               {formatNumber(Math.round(entry.combatPower))}
             </p>
@@ -147,11 +150,9 @@ function PodiumCard({
   );
 }
 
-function RankingListRow({
-  entry,
-}: {
-  entry: RankingEntry;
-}) {
+function RankingListRow({ entry }: { entry: RankingEntry }) {
+  const { t, formatFocusTime, formatNumber } = useI18n();
+
   return (
     <Link
       href={getUserProfilePath(entry.nickname)}
@@ -169,10 +170,11 @@ function RankingListRow({
 
       <div className="col-span-2 grid grid-cols-2 gap-2 text-sm sm:col-span-1 sm:contents">
         <span className="tabular-nums text-[#cdd2dc] sm:text-center">
-          Lv. {formatNumber(entry.level)}
+          {t.common.level}. {formatNumber(entry.level)}
         </span>
         <span className="tabular-nums text-[#cdd2dc] sm:text-center">
-          {formatNumber(entry.highestFloor)}F
+          {formatNumber(entry.highestFloor)}
+          {t.common.floorUnit}
         </span>
         <span className="tabular-nums text-[#cdd2dc] sm:text-center">
           {formatFocusTime(entry.focusTime)}
@@ -191,11 +193,8 @@ type RankingBoardProps = {
   loading: boolean;
 };
 
-export function RankingBoard({
-  activeTab,
-  rankings,
-  loading,
-}: RankingBoardProps) {
+export function RankingBoard({ activeTab, rankings, loading }: RankingBoardProps) {
+  const { t } = useI18n();
   const podium = rankings.slice(0, 3);
   const rest = rankings.slice(3);
 
@@ -212,12 +211,12 @@ export function RankingBoard({
               <div className="absolute inset-0 rounded-full border-4 border-[#3d3d4a]" />
               <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-[#5383e8] border-r-[#5383e8]" />
             </div>
-            <p className="text-sm text-[#9aa0ae]">랭킹 데이터를 불러오는 중...</p>
+            <p className="text-sm text-[#9aa0ae]">{t.ranking.loading}</p>
           </div>
         ) : rankings.length === 0 ? (
           <div className="rounded-2xl border border-[#3d3d4a] bg-[#282830] px-6 py-16 text-center">
             <Sparkles className="mx-auto mb-3 h-8 w-8 text-[#5383e8]" />
-            <p className="text-[#9aa0ae]">표시할 랭킹 데이터가 없습니다.</p>
+            <p className="text-[#9aa0ae]">{t.ranking.empty}</p>
           </div>
         ) : (
           <>
@@ -241,12 +240,12 @@ export function RankingBoard({
             {rest.length > 0 && (
               <div className="overflow-hidden rounded-2xl border border-[#3d3d4a] bg-[#282830]">
                 <div className="hidden border-b border-[#3d3d4a] bg-[#1c1c1f]/80 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae] sm:grid sm:grid-cols-[56px_minmax(140px,1.2fr)_repeat(4,minmax(0,1fr))] sm:gap-4">
-                  <span className="text-center">순위</span>
-                  <span>닉네임</span>
-                  <span className="text-center">레벨</span>
-                  <span className="text-center">최고층</span>
-                  <span className="text-center">집중 시간</span>
-                  <span className="text-center">전투력</span>
+                  <span className="text-center">{t.common.rank}</span>
+                  <span>{t.common.nickname}</span>
+                  <span className="text-center">{t.common.level}</span>
+                  <span className="text-center">{t.common.highestFloor}</span>
+                  <span className="text-center">{t.common.focusTime}</span>
+                  <span className="text-center">{t.common.combatPower}</span>
                 </div>
 
                 <div className="divide-y divide-[#3d3d4a]/70 sm:divide-y-0">

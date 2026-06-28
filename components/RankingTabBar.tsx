@@ -1,52 +1,9 @@
 "use client";
 
-import {
-  Castle,
-  ShieldHalf,
-  Swords,
-  Timer,
-} from "lucide-react";
+import { Castle, ShieldHalf, Swords, Timer } from "lucide-react";
 
+import { useI18n } from "@/components/I18nProvider";
 import type { RankingType } from "@/lib/ranking-types";
-
-export type RankingTab = {
-  id: RankingType;
-  label: string;
-  emoji: string;
-  icon: typeof Castle;
-  metricLabel: string;
-};
-
-export const RANKING_TABS: RankingTab[] = [
-  {
-    id: "highestFloor",
-    label: "탑 최고층 랭킹",
-    emoji: "🏰",
-    icon: Castle,
-    metricLabel: "최고층",
-  },
-  {
-    id: "weeklyFocus",
-    label: "주간 집중 랭킹",
-    emoji: "⏱️",
-    icon: Timer,
-    metricLabel: "집중 시간",
-  },
-  {
-    id: "combatPower",
-    label: "종합 전투력 랭킹",
-    emoji: "⚔️",
-    icon: Swords,
-    metricLabel: "전투력",
-  },
-  {
-    id: "guild",
-    label: "길드 명예의 전당",
-    emoji: "🛡️",
-    icon: ShieldHalf,
-    metricLabel: "길드",
-  },
-];
 
 type RankingTabBarProps = {
   activeTab: RankingType;
@@ -54,9 +11,23 @@ type RankingTabBarProps = {
 };
 
 export function RankingTabBar({ activeTab, onTabChange }: RankingTabBarProps) {
+  const { t } = useI18n();
+
+  const tabs: {
+    id: RankingType;
+    emoji: string;
+    icon: typeof Castle;
+    label: string;
+  }[] = [
+    { id: "highestFloor", emoji: "🏰", icon: Castle, label: t.tabs.highestFloor },
+    { id: "weeklyFocus", emoji: "⏱️", icon: Timer, label: t.tabs.weeklyFocus },
+    { id: "combatPower", emoji: "⚔️", icon: Swords, label: t.tabs.combatPower },
+    { id: "guild", emoji: "🛡️", icon: ShieldHalf, label: t.tabs.guild },
+  ];
+
   return (
     <div className="mb-6 flex flex-wrap gap-2 sm:gap-3">
-      {RANKING_TABS.map((tab) => {
+      {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = tab.id === activeTab;
 

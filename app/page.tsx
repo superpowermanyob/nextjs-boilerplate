@@ -4,7 +4,9 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Trophy } from "lucide-react";
 
+import { DocumentTitle } from "@/components/DocumentTitle";
 import { GuildRankingBoard } from "@/components/GuildRankingBoard";
+import { useI18n } from "@/components/I18nProvider";
 import { RankingBoard } from "@/components/RankingBoard";
 import { RankingTabBar } from "@/components/RankingTabBar";
 import { getUserProfilePath } from "@/lib/profile-utils";
@@ -21,6 +23,7 @@ type ApiErrorResponse = {
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useI18n();
   const [nickname, setNickname] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -40,7 +43,7 @@ export default function Home() {
       const data = (await response.json()) as RankingsResponse & ApiErrorResponse;
 
       if (!response.ok) {
-        setRankingError(data.error ?? "랭킹을 불러오지 못했습니다.");
+        setRankingError(data.error ?? t.errors.rankingFailed);
         setRankings([]);
         setGuildRankings([]);
         return;
@@ -54,13 +57,13 @@ export default function Home() {
         setGuildRankings([]);
       }
     } catch {
-      setRankingError("네트워크 오류가 발생했습니다.");
+      setRankingError(t.errors.network);
       setRankings([]);
       setGuildRankings([]);
     } finally {
       setRankingLoading(false);
     }
-  }, []);
+  }, [t.errors.network, t.errors.rankingFailed]);
 
   useEffect(() => {
     void fetchRankings(activeTab);
@@ -71,7 +74,7 @@ export default function Home() {
 
     const trimmedNickname = nickname.trim();
     if (!trimmedNickname) {
-      setSearchError("닉네임을 입력해 주세요.");
+      setSearchError(t.errors.nicknameRequired);
       return;
     }
 
@@ -85,17 +88,17 @@ export default function Home() {
 
       if (!response.ok) {
         if (response.status === 404) {
-          setSearchError("존재하지 않는 닉네임입니다.");
+          setSearchError(t.errors.profileNotFound);
           return;
         }
         const data = (await response.json()) as ApiErrorResponse;
-        setSearchError(data.error ?? "검색 중 오류가 발생했습니다.");
+        setSearchError(data.error ?? t.errors.searchFailed);
         return;
       }
 
       router.push(getUserProfilePath(trimmedNickname));
     } catch {
-      setSearchError("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      setSearchError(t.errors.searchNetwork);
     } finally {
       setSearchLoading(false);
     }
@@ -110,19 +113,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#1c1c1f] font-sans text-[#cdd2dc]">
+      <DocumentTitle />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(83,131,232,0.12),transparent_40%),radial-gradient(circle_at_80%_100%,rgba(139,92,246,0.08),transparent_35%)]" />
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <main className="relative mx-auto w-full max-w-6xl px-4 pb-6 pt-20 sm:px-6 sm:pb-10 sm:pt-24 lg:px-8">
         <header className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#5383e8]/30 bg-[#5383e8]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#9eb8ff]">
             <Trophy className="h-3.5 w-3.5" />
-            Focus RPG
+            {t.home.badge}
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            전적 · 랭킹
+            {t.home.title}
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-[#9aa0ae] sm:text-base">
-            닉네임으로 전적을 검색하거나, 실시간 랭킹 보드를 확인하세요.
+            {t.home.subtitle}
           </p>
         </header>
 
@@ -133,7 +137,7 @@ export default function Home() {
           >
             <div className="flex flex-col gap-2 sm:flex-row">
               <label htmlFor="nickname" className="sr-only">
-                플레이어 닉네임
+                {t.home.searchLabel}
               </label>
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#6b7280]" />
@@ -142,7 +146,7 @@ export default function Home() {
                   type="text"
                   value={nickname}
                   onChange={(event) => setNickname(event.target.value)}
-                  placeholder="플레이어 닉네임을 입력하세요"
+                  placeholder={t.home.searchPlaceholder}
                   autoComplete="off"
                   spellCheck={false}
                   className="h-14 w-full rounded-xl border border-transparent bg-[#1c1c1f] pl-12 pr-5 text-base text-white placeholder:text-[#6b7280] outline-none transition focus:border-[#5383e8]/60 focus:ring-2 focus:ring-[#5383e8]/30 sm:h-16 sm:text-lg"
@@ -153,7 +157,7 @@ export default function Home() {
                 disabled={searchLoading}
                 className="h-14 shrink-0 rounded-xl bg-[#5383e8] px-8 text-base font-semibold text-white transition hover:bg-[#4171d6] disabled:cursor-not-allowed disabled:opacity-60 sm:h-16 sm:min-w-[120px] sm:text-lg"
               >
-                {searchLoading ? "검색 중..." : "검색"}
+                {searchLoading ? t.common.searching : t.common.search}
               </button>
             </div>
           </form>
@@ -172,9 +176,11 @@ export default function Home() {
 
         <section className="border-t border-[#3d3d4a]/80 pt-10">
           <div className="mb-6 flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold text-white sm:text-2xl">랭킹 보드</h2>
+            <h2 className="text-xl font-bold text-white sm:text-2xl">
+              {t.home.rankingBoard}
+            </h2>
             <span className="text-xs text-[#9aa0ae] sm:text-sm">
-              {activeTab === "guild" ? "Top 50 Guilds" : "Top 100"}
+              {activeTab === "guild" ? t.home.top50Guilds : t.home.top100}
             </span>
           </div>
 

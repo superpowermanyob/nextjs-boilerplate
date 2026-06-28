@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Crown, Shield, Sparkles, Users } from "lucide-react";
 
-import { formatNumber, getUserProfilePath } from "@/lib/profile-utils";
+import { useI18n } from "@/components/I18nProvider";
+import { getUserProfilePath } from "@/lib/profile-utils";
 import type { GuildRankingEntry } from "@/lib/ranking-types";
 
 type GuildRankingBoardProps = {
@@ -24,6 +25,8 @@ function GuildPodiumCard({
   entry: GuildRankingEntry;
   place: 1 | 2 | 3;
 }) {
+  const { t, formatNumber } = useI18n();
+
   return (
     <article className={`rounded-2xl border p-5 ${PODIUM_STYLES[place]}`}>
       <div className="mb-3 flex items-center justify-between">
@@ -35,19 +38,20 @@ function GuildPodiumCard({
       <h3 className="truncate text-xl font-bold text-white">{entry.guildName}</h3>
       <p className="mt-1 text-sm text-[#9aa0ae]">
         <Users className="mr-1 inline h-3.5 w-3.5" />
-        {formatNumber(entry.memberCount)}명
+        {formatNumber(entry.memberCount)}
       </p>
       <div className="mt-4 space-y-2 text-sm">
         <p className="text-[#cdd2dc]">
-          합산 전투력{" "}
+          {t.guild.totalPower}{" "}
           <span className="font-bold text-[#9eb8ff]">
             {formatNumber(Math.round(entry.totalCombatPower))}
           </span>
         </p>
         <p className="text-[#cdd2dc]">
-          평균 최고층{" "}
+          {t.guild.avgFloor}{" "}
           <span className="font-bold text-white">
-            {formatNumber(entry.averageHighestFloor)}F
+            {formatNumber(entry.averageHighestFloor)}
+            {t.common.floorUnit}
           </span>
         </p>
       </div>
@@ -59,6 +63,8 @@ export function GuildRankingBoard({
   guildRankings,
   loading,
 }: GuildRankingBoardProps) {
+  const { t, formatNumber } = useI18n();
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
@@ -66,7 +72,7 @@ export function GuildRankingBoard({
           <div className="absolute inset-0 rounded-full border-4 border-[#3d3d4a]" />
           <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-[#5383e8] border-r-[#5383e8]" />
         </div>
-        <p className="text-sm text-[#9aa0ae]">길드 랭킹을 불러오는 중...</p>
+        <p className="text-sm text-[#9aa0ae]">{t.guild.loading}</p>
       </div>
     );
   }
@@ -75,7 +81,7 @@ export function GuildRankingBoard({
     return (
       <div className="rounded-2xl border border-[#3d3d4a] bg-[#282830] px-6 py-16 text-center">
         <Sparkles className="mx-auto mb-3 h-8 w-8 text-[#5383e8]" />
-        <p className="text-[#9aa0ae]">표시할 길드 랭킹 데이터가 없습니다.</p>
+        <p className="text-[#9aa0ae]">{t.guild.empty}</p>
       </div>
     );
   }
@@ -100,12 +106,12 @@ export function GuildRankingBoard({
       {rest.length > 0 && (
         <div className="overflow-hidden rounded-2xl border border-[#3d3d4a] bg-[#282830]">
           <div className="hidden border-b border-[#3d3d4a] bg-[#1c1c1f]/80 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#9aa0ae] sm:grid sm:grid-cols-[56px_1.2fr_repeat(4,minmax(0,1fr))] sm:gap-4">
-            <span className="text-center">순위</span>
-            <span>길드명</span>
-            <span className="text-center">길드원</span>
-            <span className="text-center">합산 전투력</span>
-            <span className="text-center">평균 최고층</span>
-            <span className="text-center">최고 층 유저</span>
+            <span className="text-center">{t.common.rank}</span>
+            <span>{t.guild.guildName}</span>
+            <span className="text-center">{t.common.members}</span>
+            <span className="text-center">{t.guild.totalPower}</span>
+            <span className="text-center">{t.guild.avgFloor}</span>
+            <span className="text-center">{t.guild.topMember}</span>
           </div>
 
           {rest.map((entry) => (
@@ -129,19 +135,21 @@ export function GuildRankingBoard({
 
               <div className="col-span-2 grid grid-cols-2 gap-2 text-sm sm:col-span-1 sm:contents">
                 <span className="text-[#cdd2dc] sm:text-center">
-                  {formatNumber(entry.memberCount)}명
+                  {formatNumber(entry.memberCount)}
                 </span>
                 <span className="font-medium text-[#9eb8ff] sm:text-center">
                   {formatNumber(Math.round(entry.totalCombatPower))}
                 </span>
                 <span className="text-[#cdd2dc] sm:text-center">
-                  {formatNumber(entry.averageHighestFloor)}F
+                  {formatNumber(entry.averageHighestFloor)}
+                  {t.common.floorUnit}
                 </span>
                 <Link
                   href={getUserProfilePath(entry.topMemberNickname)}
                   className="truncate text-[#5383e8] hover:underline sm:text-center"
                 >
-                  {entry.topMemberNickname} ({formatNumber(entry.topMemberFloor)}F)
+                  {entry.topMemberNickname} ({formatNumber(entry.topMemberFloor)}
+                  {t.common.floorUnit})
                 </Link>
               </div>
             </div>

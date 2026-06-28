@@ -1,8 +1,12 @@
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+
 export type PublicProfile = {
   id: string;
   nickname: string;
   [key: string]: unknown;
 };
+
+export type EquipmentSlotKey = "weapon" | "armor" | "accessory";
 
 export type EquipmentOption = {
   name?: string;
@@ -15,31 +19,14 @@ export type EquipmentOption = {
 };
 
 export type ParsedEquipment = {
-  slot: "무기" | "방어구" | "장신구";
+  slotKey: EquipmentSlotKey;
   name: string;
   nameEn: string;
   rarity: string;
-  rarityLabel: string;
   enhancementLevel: number;
   prefixes: string[];
-  subOptions: string[];
+  options: EquipmentOption[];
   empty: boolean;
-};
-
-const STAT_LABELS: Record<string, string> = {
-  atk: "공격력",
-  def: "방어력",
-  hp: "체력",
-  spd: "속도",
-  luk: "운",
-  focusMulti: "집중 배율",
-};
-
-const RARITY_LABELS: Record<string, string> = {
-  common: "일반",
-  rare: "레어",
-  epic: "에픽",
-  legendary: "전설",
 };
 
 const RARITY_COLORS: Record<string, string> = {
@@ -82,30 +69,35 @@ export function pickNumber(
   return null;
 }
 
-export function formatNumber(value: number | null): string {
+export function formatNumber(value: number | null, locale = "en"): string {
   if (value === null) {
     return "—";
   }
-  return value.toLocaleString("ko-KR");
+  return value.toLocaleString(locale);
 }
 
-export function formatRarity(value: string): string {
-  return RARITY_LABELS[value.toLowerCase()] ?? value;
+export function formatRarity(value: string, rarityDict: Dictionary["rarity"]): string {
+  const key = value.toLowerCase() as keyof Dictionary["rarity"];
+  return rarityDict[key] ?? value;
 }
 
 export function getRarityColorClass(value: string): string {
   return RARITY_COLORS[value.toLowerCase()] ?? "border-[#3d3d4a] text-[#cdd2dc]";
 }
 
-function formatStatType(statType?: string): string {
+function formatStatType(statType: string | undefined, stats: Dictionary["stats"]): string {
   if (!statType) {
-    return "스탯";
+    return stats.generic;
   }
-  return STAT_LABELS[statType] ?? statType.toUpperCase();
+  const key = statType as keyof Dictionary["stats"];
+  return stats[key] ?? statType.toUpperCase();
 }
 
-function formatEquipmentOption(option: EquipmentOption): string {
-  const stat = formatStatType(option.statType);
+export function formatEquipmentOption(
+  option: EquipmentOption,
+  stats: Dictionary["stats"],
+): string {
+  const stat = formatStatType(option.statType, stats);
   const prefix = option.name?.trim();
 
   if (option.type === "percentage" && option.percentageValue != null) {
@@ -121,37 +113,32 @@ function formatEquipmentOption(option: EquipmentOption): string {
     return prefix ? `${prefix} · ${String(option.specialValue)}` : String(option.specialValue);
   }
 
-  return prefix ?? "부옵션";
+  return prefix ?? stats.subOption;
 }
 
-function parseEquipmentItem(
-  item: unknown,
-  slot: ParsedEquipment["slot"],
-): ParsedEquipment {
+function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEquipment {
   if (item === null || item === undefined) {
     return {
-      slot,
-      name: "미장착",
+      slotKey,
+      name: "",
       nameEn: "",
       rarity: "",
-      rarityLabel: "—",
       enhancementLevel: 0,
       prefixes: [],
-      subOptions: [],
+      options: [],
       empty: true,
     };
   }
 
   if (typeof item !== "object") {
     return {
-      slot,
+      slotKey,
       name: String(item),
       nameEn: "",
       rarity: "",
-      rarityLabel: "—",
       enhancementLevel: 0,
       prefixes: [],
-      subOptions: [],
+      options: [],
       empty: false,
     };
   }
@@ -163,7 +150,6 @@ function parseEquipmentItem(
   const prefixes = options
     .map((option) => option.name?.trim())
     .filter((name): name is string => Boolean(name));
-  const subOptions = options.map(formatEquipmentOption);
 
   const standalonePrefix = pickString(record, ["prefix", "affix", "prefixName"], "");
   if (standalonePrefix !== "—" && !prefixes.includes(standalonePrefix)) {
@@ -171,23 +157,22 @@ function parseEquipmentItem(
   }
 
   return {
-    slot,
-    name: pickString(record, ["nameKo", "nameEn", "name"], "미장착"),
+    slotKey,
+    name: pickString(record, ["nameKo", "nameEn", "name"], ""),
     nameEn: pickString(record, ["nameEn"], ""),
     rarity,
-    rarityLabel: rarity ? formatRarity(rarity) : "—",
     enhancementLevel: pickNumber(record, ["enhancementLevel", "enhance"]) ?? 0,
     prefixes,
-    subOptions,
+    options,
     empty: false,
   };
 }
 
 export function extractEquipment(profile: PublicProfile): ParsedEquipment[] {
   return [
-    parseEquipmentItem(profile.weapon, "무기"),
-    parseEquipmentItem(profile.armor, "방어구"),
-    parseEquipmentItem(profile.accessory, "장신구"),
+    parseEquipmentItem(profile.weapon, "weapon"),
+    parseEquipmentItem(profile.armor, "armor"),
+    parseEquipmentItem(profile.accessory, "accessory"),
   ];
 }
 
@@ -209,4 +194,11 @@ export function extractTitles(profile: PublicProfile): {
 
 export function getUserProfilePath(nickname: string): string {
   return `/user/${encodeURIComponent(nickname)}`;
+}
+
+export function getEquipmentSlotLabel(
+  slotKey: EquipmentSlotKey,
+  equipmentDict: Dictionary["equipment"],
+): string {
+  return equipmentDict[slotKey];
 }
