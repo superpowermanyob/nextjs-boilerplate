@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { UserDetailView } from "@/components/UserDetailView";
 import { searchPublicProfileByNickname } from "@/lib/public-profiles";
 
+export const dynamic = "force-dynamic";
+
 type UserPageProps = {
   params: Promise<{ nickname: string }>;
 };

@@ -4,6 +4,8 @@ import { getGuildRankings } from "@/lib/guild-rankings";
 import { getRankings } from "@/lib/rankings";
 import type { RankingType } from "@/lib/ranking-types";
 
+export const dynamic = "force-dynamic";
+
 const VALID_TYPES: RankingType[] = [
   "highestFloor",
   "weeklyFocus",

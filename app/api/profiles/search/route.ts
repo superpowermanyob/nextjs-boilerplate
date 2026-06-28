@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { searchPublicProfileByNickname } from "@/lib/public-profiles";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const nickname = request.nextUrl.searchParams.get("nickname");
 

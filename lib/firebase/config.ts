@@ -19,18 +19,25 @@ export type FirebaseClientConfig = {
   measurementId?: string;
 };
 
+const warnedKeys = new Set<string>();
+
 function readEnv(key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]): string {
   const value = process.env[key]?.trim();
   if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    if (!warnedKeys.has(key)) {
+      warnedKeys.add(key);
+      console.warn(`[firebase/config] Missing environment variable: ${key}`);
+    }
+    return "";
   }
   return value;
 }
 
 export function getFirebaseConfig(): FirebaseClientConfig {
   for (const key of REQUIRED_FIREBASE_ENV_KEYS) {
-    if (!process.env[key]?.trim()) {
-      throw new Error(`Missing required environment variable: ${key}`);
+    if (!process.env[key]?.trim() && !warnedKeys.has(key)) {
+      warnedKeys.add(key);
+      console.warn(`[firebase/config] Missing environment variable: ${key}`);
     }
   }
 
@@ -46,4 +53,8 @@ export function getFirebaseConfig(): FirebaseClientConfig {
     appId: readEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
     ...(measurementId ? { measurementId } : {}),
   };
+}
+
+export function isFirebaseConfigReady(): boolean {
+  return REQUIRED_FIREBASE_ENV_KEYS.every((key) => Boolean(process.env[key]?.trim()));
 }
