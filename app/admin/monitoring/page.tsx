@@ -1,6 +1,7 @@
 import { AdminMonitoringPanel } from "@/components/AdminMonitoringPanel";
 import {
   getBannerDocument,
+  getFirebaseAdminStatus,
   serializeBannerForAdmin,
 } from "@/lib/banner-server";
 import { BANNER_LOCALE_CODES } from "@/lib/banner-text";
@@ -14,6 +15,7 @@ const EMPTY_MESSAGES = Object.fromEntries(
 export default async function AdminMonitoringPage() {
   let initialMessages = EMPTY_MESSAGES;
   let initialError: string | undefined;
+  const adminStatus = getFirebaseAdminStatus();
 
   try {
     const banner = await getBannerDocument();
@@ -28,6 +30,7 @@ export default async function AdminMonitoringPage() {
       <AdminMonitoringPanel
         initialMessages={initialMessages}
         initialError={initialError}
+        adminStatus={adminStatus}
       />
     </div>
   );

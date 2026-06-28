@@ -8,6 +8,7 @@ import {
   type BannerMessages,
 } from "@/app/admin/monitoring/actions";
 import { BANNER_LOCALE_CODES } from "@/lib/banner-text";
+import type { FirebaseAdminStatus } from "@/lib/firebase/admin";
 import { LOCALES } from "@/lib/i18n/locales";
 
 const LOCALE_META = Object.fromEntries(
@@ -20,11 +21,13 @@ const LOCALE_META = Object.fromEntries(
 type AdminMonitoringPanelProps = {
   initialMessages: BannerMessages;
   initialError?: string;
+  adminStatus: FirebaseAdminStatus;
 };
 
 export function AdminMonitoringPanel({
   initialMessages,
   initialError,
+  adminStatus,
 }: AdminMonitoringPanelProps) {
   const [messages, setMessages] = useState(initialMessages);
   const [status, setStatus] = useState(initialError ?? "");
@@ -150,12 +153,29 @@ export function AdminMonitoringPanel({
           </p>
         )}
 
-        {initialError?.includes("FIREBASE_SERVICE_ACCOUNT_JSON") && (
+        {initialError && (
           <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-            Vercel(또는 `.env.local`)에{" "}
-            <code className="text-amber-100">FIREBASE_SERVICE_ACCOUNT_JSON</code> 환경
-            변수를 추가한 뒤 재배포해야 저장됩니다. Firebase Console → 프로젝트 설정 →
-            서비스 계정 → 새 비공개 키 생성.
+            <p className="font-semibold text-amber-100">Firebase Admin 설정 안내</p>
+            <p className="mt-2">{initialError}</p>
+            <p className="mt-3 text-amber-100/90">
+              상태: source={adminStatus.source}, parse=
+              {adminStatus.parseOk ? "ok" : "fail"}, init=
+              {adminStatus.initialized ? "ok" : "fail"}
+            </p>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-amber-100/90">
+              <li>
+                <strong>방법 A (권장):</strong> Vercel에{" "}
+                <code>FIREBASE_CLIENT_EMAIL</code> + <code>FIREBASE_PRIVATE_KEY</code>{" "}
+                두 개로 분리 저장 (private key는{" "}
+                <code>\n</code> 포함한 한 줄 문자열)
+              </li>
+              <li>
+                <strong>방법 B:</strong> JSON 파일을{" "}
+                <strong>한 줄(minify)</strong>로 만든 뒤{" "}
+                <code>FIREBASE_SERVICE_ACCOUNT_JSON</code>에 저장
+              </li>
+              <li>Production 환경에 등록했는지, 재배포했는지 확인</li>
+            </ul>
           </div>
         )}
       </section>

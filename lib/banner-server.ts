@@ -6,22 +6,28 @@ import {
   BANNER_LOCALE_CODES,
   extractBannerMessages,
 } from "@/lib/banner-text";
-import { getAdminFirestore } from "@/lib/firebase/admin";
+import {
+  getAdminFirestore,
+  getFirebaseAdminStatus,
+} from "@/lib/firebase/admin";
 
 export type BannerDocument = Record<string, unknown>;
+
+function getFirestoreOrThrow() {
+  const db = getAdminFirestore();
+  if (db) {
+    return db;
+  }
+
+  throw new Error(getFirebaseAdminStatus().message);
+}
 
 export function isAdminBannerConfigured(): boolean {
   return Boolean(getAdminFirestore());
 }
 
 export async function getBannerDocument(): Promise<BannerDocument | null> {
-  const db = getAdminFirestore();
-  if (!db) {
-    throw new Error(
-      "Firebase Admin is not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON on the server.",
-    );
-  }
-
+  const db = getFirestoreOrThrow();
   const snapshot = await db.collection("settings").doc("banner").get();
   return snapshot.exists ? (snapshot.data() as BannerDocument) : null;
 }
@@ -29,12 +35,7 @@ export async function getBannerDocument(): Promise<BannerDocument | null> {
 export async function updateBannerDocument(
   messages: Partial<Record<(typeof BANNER_LOCALE_CODES)[number], string>>,
 ): Promise<void> {
-  const db = getAdminFirestore();
-  if (!db) {
-    throw new Error(
-      "Firebase Admin is not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON on the server.",
-    );
-  }
+  const db = getFirestoreOrThrow();
 
   const payload: Record<string, unknown> = {
     enabled: true,
@@ -42,8 +43,7 @@ export async function updateBannerDocument(
   };
 
   for (const code of BANNER_LOCALE_CODES) {
-    const value = messages[code]?.trim() ?? "";
-    payload[code] = value;
+    payload[code] = messages[code]?.trim() ?? "";
   }
 
   await db.collection("settings").doc("banner").set(payload, { merge: true });
@@ -55,3 +55,5 @@ export function serializeBannerForAdmin(data: BannerDocument | null) {
     messages: extractBannerMessages(data),
   };
 }
+
+export { getFirebaseAdminStatus };

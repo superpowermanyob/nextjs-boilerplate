@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getBannerDocument } from "@/lib/banner-server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
   try {

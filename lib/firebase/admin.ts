@@ -1,17 +1,44 @@
 import "server-only";
 
-import { cert, getApps, initializeApp, type App, type ServiceAccount } from "firebase-admin/app";
+import {
+  cert,
+  getApps,
+  initializeApp,
+  type App,
+  type ServiceAccount,
+} from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
 import { getFirestore } from "firebase-admin/firestore";
 
 let adminApp: App | undefined;
+let initError: string | null = null;
 
-type ServiceAccountJson = {
+export type ServiceAccountJson = {
+  type?: string;
   project_id?: string;
   client_email?: string;
   private_key?: string;
   [key: string]: unknown;
 };
+
+export type FirebaseAdminStatus = {
+  configured: boolean;
+  source: "json" | "split-env" | "none";
+  parseOk: boolean;
+  initialized: boolean;
+  message: string;
+};
+
+function stripWrappingQuotes(value: string): string {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith("'") && trimmed.endsWith("'")) ||
+    (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
 
 function normalizePrivateKey(serviceAccount: ServiceAccountJson): ServiceAccountJson {
   if (typeof serviceAccount.private_key !== "string") {
@@ -24,33 +51,166 @@ function normalizePrivateKey(serviceAccount: ServiceAccountJson): ServiceAccount
   };
 }
 
-function parseServiceAccountJson(raw: string): ServiceAccountJson {
-  const trimmed = raw.trim();
+function tryParseJson(raw: string): ServiceAccountJson | null {
+  const attempts = [
+    raw,
+    stripWrappingQuotes(raw),
+    raw.replace(/\\n/g, "\n"),
+    stripWrappingQuotes(raw).replace(/\\n/g, "\n"),
+  ];
 
-  try {
-    return normalizePrivateKey(JSON.parse(trimmed) as ServiceAccountJson);
-  } catch {
-    // Vercel 등에서 private_key의 \n 이 \\n 으로 이중 이스케이프된 경우
-    const unescaped = trimmed.replace(/\\n/g, "\n");
-    return normalizePrivateKey(JSON.parse(unescaped) as ServiceAccountJson);
+  for (const candidate of attempts) {
+    try {
+      const parsed = JSON.parse(candidate.trim()) as ServiceAccountJson;
+      if (parsed && typeof parsed === "object") {
+        return normalizePrivateKey(parsed);
+      }
+    } catch {
+      // try next strategy
+    }
   }
+
+  return null;
 }
 
-function parseServiceAccount(): ServiceAccountJson | null {
+function parseFromSplitEnv(): ServiceAccountJson | null {
+  const clientEmail =
+    process.env.FIREBASE_CLIENT_EMAIL?.trim() ??
+    process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL?.trim();
+  const privateKey =
+    process.env.FIREBASE_PRIVATE_KEY?.trim() ??
+    process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY?.trim();
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID?.trim() ??
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim();
+
+  if (!clientEmail || !privateKey) {
+    return null;
+  }
+
+  return normalizePrivateKey({
+    type: "service_account",
+    project_id: projectId,
+    client_email: clientEmail,
+    private_key: privateKey,
+  });
+}
+
+function parseFromJsonEnv(): ServiceAccountJson | null {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
   if (!raw) {
     return null;
   }
 
+  const decoded = tryParseJson(raw);
+  if (decoded) {
+    return decoded;
+  }
+
+  // Base64로 저장한 경우
   try {
-    return parseServiceAccountJson(raw);
-  } catch (error) {
-    console.warn(
-      "[firebase/admin] FIREBASE_SERVICE_ACCOUNT_JSON parse failed:",
-      error instanceof Error ? error.message : error,
-    );
+    const base64Decoded = Buffer.from(raw, "base64").toString("utf8");
+    return tryParseJson(base64Decoded);
+  } catch {
     return null;
   }
+}
+
+function parseServiceAccount(): {
+  account: ServiceAccountJson | null;
+  source: FirebaseAdminStatus["source"];
+  parseOk: boolean;
+} {
+  const fromSplit = parseFromSplitEnv();
+  if (fromSplit?.client_email && fromSplit.private_key) {
+    return { account: fromSplit, source: "split-env", parseOk: true };
+  }
+
+  const fromJson = parseFromJsonEnv();
+  if (fromJson?.client_email && fromJson.private_key) {
+    return { account: fromJson, source: "json", parseOk: true };
+  }
+
+  const hasJsonEnv = Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim());
+  const hasSplitEnv = Boolean(
+    process.env.FIREBASE_CLIENT_EMAIL?.trim() &&
+      process.env.FIREBASE_PRIVATE_KEY?.trim(),
+  );
+
+  if (hasJsonEnv) {
+    return { account: null, source: "json", parseOk: false };
+  }
+
+  if (hasSplitEnv) {
+    return { account: null, source: "split-env", parseOk: false };
+  }
+
+  return { account: null, source: "none", parseOk: false };
+}
+
+export function getFirebaseAdminStatus(): FirebaseAdminStatus {
+  const { account, source, parseOk } = parseServiceAccount();
+  const initialized = Boolean(adminApp ?? getApps()[0]);
+
+  if (initialized) {
+    return {
+      configured: true,
+      source,
+      parseOk: true,
+      initialized: true,
+      message: "Firebase Admin initialized.",
+    };
+  }
+
+  if (initError) {
+    return {
+      configured: false,
+      source,
+      parseOk,
+      initialized: false,
+      message: initError,
+    };
+  }
+
+  if (source === "none") {
+    return {
+      configured: false,
+      source,
+      parseOk: false,
+      initialized: false,
+      message:
+        "Firebase Admin env missing. Set FIREBASE_SERVICE_ACCOUNT_JSON (one-line JSON) or FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY.",
+    };
+  }
+
+  if (!parseOk) {
+    return {
+      configured: false,
+      source,
+      parseOk: false,
+      initialized: false,
+      message:
+        "FIREBASE_SERVICE_ACCOUNT_JSON parse failed. Paste minified one-line JSON, or use FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY instead.",
+    };
+  }
+
+  if (!account) {
+    return {
+      configured: false,
+      source,
+      parseOk: false,
+      initialized: false,
+      message: "Service account JSON is missing client_email or private_key.",
+    };
+  }
+
+  return {
+    configured: false,
+    source,
+    parseOk: true,
+    initialized: false,
+    message: "Firebase Admin is not initialized yet.",
+  };
 }
 
 export function getAdminApp(): App | null {
@@ -60,22 +220,32 @@ export function getAdminApp(): App | null {
 
   if (getApps().length > 0) {
     adminApp = getApps()[0];
+    initError = null;
     return adminApp;
   }
 
-  const serviceAccount = parseServiceAccount();
-  if (!serviceAccount) {
+  const { account } = parseServiceAccount();
+  if (!account?.client_email || !account.private_key) {
     return null;
   }
 
-  adminApp = initializeApp({
-    credential: cert(serviceAccount as ServiceAccount),
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-    projectId:
-      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? serviceAccount.project_id,
-  });
-
-  return adminApp;
+  try {
+    adminApp = initializeApp({
+      credential: cert(account as ServiceAccount),
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      projectId:
+        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? account.project_id,
+    });
+    initError = null;
+    return adminApp;
+  } catch (error) {
+    initError =
+      error instanceof Error
+        ? `Firebase Admin initializeApp failed: ${error.message}`
+        : "Firebase Admin initializeApp failed.";
+    console.warn("[firebase/admin]", initError);
+    return null;
+  }
 }
 
 export function getAdminFirestore() {
