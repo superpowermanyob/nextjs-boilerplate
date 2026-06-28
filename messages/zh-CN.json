@@ -32,6 +32,9 @@
     "top100": "前 100 名",
     "top50Guilds": "前 50 公会"
   },
+  "nav": {
+    "coupon": "兑换码输入"
+  },
   "tabs": {
     "highestFloor": "塔最高层排行",
     "weeklyFocus": "每周专注排行",
@@ -130,6 +133,8 @@
     "submit": "使用兑换码",
     "submitting": "处理中…",
     "success": "兑换成功，请在游戏内邮箱查看奖励。",
+    "mailTitle": "网页兑换码奖励",
+    "mailContent": "兑换码注册奖励。",
     "backHome": "返回首页",
     "errors": {
       "identifierRequired": "请输入用户标识。",

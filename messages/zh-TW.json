@@ -32,6 +32,9 @@
     "top100": "前 100 名",
     "top50Guilds": "前 50 公會"
   },
+  "nav": {
+    "coupon": "兌換碼輸入"
+  },
   "tabs": {
     "highestFloor": "塔最高層排行",
     "weeklyFocus": "每週專注排行",
@@ -130,6 +133,8 @@
     "submit": "使用兌換碼",
     "submitting": "處理中…",
     "success": "兌換成功，請在遊戲內信箱查看獎勵。",
+    "mailTitle": "網頁兌換碼獎勵",
+    "mailContent": "兌換碼註冊獎勵。",
     "backHome": "返回首頁",
     "errors": {
       "identifierRequired": "請輸入使用者識別。",

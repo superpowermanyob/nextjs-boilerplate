@@ -19,12 +19,14 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       identifier?: string;
       couponCode?: string;
+      locale?: string;
     };
 
     const identifier = body.identifier?.trim() ?? "";
     const couponCode = body.couponCode?.trim() ?? "";
+    const locale = body.locale?.trim();
 
-    const result = await redeemCoupon(identifier, couponCode);
+    const result = await redeemCoupon(identifier, couponCode, locale);
 
     return NextResponse.json({
       ok: true,

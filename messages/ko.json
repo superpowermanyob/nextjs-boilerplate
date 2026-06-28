@@ -32,6 +32,9 @@
     "top100": "Top 100",
     "top50Guilds": "Top 50 길드"
   },
+  "nav": {
+    "coupon": "쿠폰 입력"
+  },
   "tabs": {
     "highestFloor": "탑 최고층 랭킹",
     "weeklyFocus": "주간 집중 랭킹",
@@ -130,6 +133,8 @@
     "submit": "쿠폰 사용하기",
     "submitting": "처리 중…",
     "success": "쿠폰이 등록되었습니다. 게임 내 우편함을 확인해 주세요.",
+    "mailTitle": "웹 쿠폰 보상",
+    "mailContent": "쿠폰 등록 보상입니다.",
     "backHome": "메인으로 돌아가기",
     "errors": {
       "identifierRequired": "유저 식별자를 입력해 주세요.",

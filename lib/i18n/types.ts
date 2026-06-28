@@ -32,6 +32,9 @@ export type Dictionary = {
     top100: string;
     top50Guilds: string;
   };
+  nav: {
+    coupon: string;
+  };
   tabs: {
     highestFloor: string;
     weeklyFocus: string;
@@ -130,6 +133,8 @@ export type Dictionary = {
     submit: string;
     submitting: string;
     success: string;
+    mailTitle: string;
+    mailContent: string;
     backHome: string;
     errors: {
       identifierRequired: string;

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 
 import { CommunityWidget } from "@/components/CommunityWidget";
+import { CouponShortcut } from "@/components/CouponShortcut";
 import { I18nProvider } from "@/components/I18nProvider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
@@ -48,6 +49,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <I18nProvider>
+          <CouponShortcut />
           <LanguageSwitcher />
           {children}
           <CommunityWidget />

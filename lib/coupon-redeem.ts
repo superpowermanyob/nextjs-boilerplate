@@ -2,6 +2,7 @@ import "server-only";
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
+import { buildMailboxPayload } from "@/lib/coupon-mail";
 import { CouponError } from "@/lib/coupon-errors";
 import { getAdminFirestore, getFirebaseAdminStatus } from "@/lib/firebase/admin";
 
@@ -132,33 +133,10 @@ async function findCouponByCode(code: string): Promise<CouponRecord | null> {
   return null;
 }
 
-function buildMailboxPayload(
-  coupon: CouponRecord,
-  couponCode: string,
-): Record<string, unknown> {
-  const data = coupon.data;
-
-  return {
-    title:
-      (typeof data.title === "string" && data.title.trim()) ||
-      (typeof data.mailTitle === "string" && data.mailTitle.trim()) ||
-      "웹 쿠폰 보상",
-    content:
-      (typeof data.content === "string" && data.content.trim()) ||
-      (typeof data.mailContent === "string" && data.mailContent.trim()) ||
-      (typeof data.description === "string" && data.description.trim()) ||
-      "쿠폰 등록 보상입니다.",
-    rewards: data.rewards ?? data.reward ?? data.items ?? {},
-    createdAt: FieldValue.serverTimestamp(),
-    isRead: false,
-    source: "web_coupon",
-    couponCode,
-  };
-}
-
 export async function redeemCoupon(
   identifier: string,
   couponCode: string,
+  locale?: string,
 ): Promise<{ userId: string; couponCode: string }> {
   const trimmedIdentifier = identifier.trim();
   const trimmedCode = couponCode.trim();
@@ -194,7 +172,13 @@ export async function redeemCoupon(
       throw new CouponError("COUPON_ALREADY_USED", "Coupon already redeemed.");
     }
 
-    transaction.set(mailboxRef, buildMailboxPayload(coupon, normalizedCode));
+    transaction.set(
+      mailboxRef,
+      {
+        ...buildMailboxPayload(coupon.data, normalizedCode, locale),
+        createdAt: FieldValue.serverTimestamp(),
+      },
+    );
     transaction.set(historyRef, {
       userId: user.id,
       couponCode: normalizedCode,

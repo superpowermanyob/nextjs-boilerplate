@@ -32,6 +32,9 @@
     "top100": "Top 100",
     "top50Guilds": "Top 50 Guilds"
   },
+  "nav": {
+    "coupon": "Redeem Coupon"
+  },
   "tabs": {
     "highestFloor": "Tower Best Floor",
     "weeklyFocus": "Weekly Focus",
@@ -130,6 +133,8 @@
     "submit": "Redeem Coupon",
     "submitting": "Processing…",
     "success": "Coupon redeemed successfully. Please check your in-game mailbox.",
+    "mailTitle": "Web Coupon Reward",
+    "mailContent": "Thank you for redeeming your coupon.",
     "backHome": "Back to Home",
     "errors": {
       "identifierRequired": "Please enter your user identifier.",

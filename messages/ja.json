@@ -32,6 +32,9 @@
     "top100": "Top 100",
     "top50Guilds": "Top 50 ギルド"
   },
+  "nav": {
+    "coupon": "クーポン入力"
+  },
   "tabs": {
     "highestFloor": "タワー最高階ランキング",
     "weeklyFocus": "週間集中ランキング",
@@ -130,6 +133,8 @@
     "submit": "クーポンを使用する",
     "submitting": "処理中…",
     "success": "クーポンが登録されました。ゲーム内郵便箱を確認してください。",
+    "mailTitle": "Webクーポン報酬",
+    "mailContent": "クーポン登録報酬です。",
     "backHome": "ホームに戻る",
     "errors": {
       "identifierRequired": "ユーザー識別子を入力してください。",

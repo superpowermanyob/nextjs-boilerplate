@@ -32,6 +32,9 @@
     "top100": "Top 100",
     "top50Guilds": "Top 50 Guild"
   },
+  "nav": {
+    "coupon": "Tukar Kupon"
+  },
   "tabs": {
     "highestFloor": "Peringkat Lantai Tertinggi",
     "weeklyFocus": "Peringkat Fokus Mingguan",
@@ -130,6 +133,8 @@
     "submit": "Gunakan Kupon",
     "submitting": "Memproses…",
     "success": "Kupon berhasil didaftarkan. Silakan periksa kotak surat dalam game.",
+    "mailTitle": "Hadiah Kupon Web",
+    "mailContent": "Hadiah pendaftaran kupon.",
     "backHome": "Kembali ke Beranda",
     "errors": {
       "identifierRequired": "Silakan masukkan identitas pengguna.",

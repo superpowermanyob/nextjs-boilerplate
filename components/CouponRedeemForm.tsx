@@ -15,7 +15,7 @@ type RedeemResponse = {
 };
 
 export function CouponRedeemForm() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [identifier, setIdentifier] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,6 +55,7 @@ export function CouponRedeemForm() {
         body: JSON.stringify({
           identifier: identifier.trim(),
           couponCode: couponCode.trim(),
+          locale,
         }),
       });
 

@@ -32,6 +32,9 @@
     "top100": "Top 100",
     "top50Guilds": "Top 50 bang hội"
   },
+  "nav": {
+    "coupon": "Nhập mã phiếu"
+  },
   "tabs": {
     "highestFloor": "Xếp hạng tầng cao nhất",
     "weeklyFocus": "Xếp hạng tập trung tuần",
@@ -130,6 +133,8 @@
     "submit": "Sử dụng phiếu",
     "submitting": "Đang xử lý…",
     "success": "Phiếu đã được đăng ký. Vui lòng kiểm tra hộp thư trong game.",
+    "mailTitle": "Phần thưởng phiếu Web",
+    "mailContent": "Phần thưởng đăng ký phiếu.",
     "backHome": "Về trang chủ",
     "errors": {
       "identifierRequired": "Vui lòng nhập định danh người dùng.",
