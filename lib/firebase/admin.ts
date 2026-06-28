@@ -173,13 +173,36 @@ export function getFirebaseAdminStatus(): FirebaseAdminStatus {
   }
 
   if (source === "none") {
+    const hasEmail = Boolean(
+      process.env.FIREBASE_CLIENT_EMAIL?.trim() ??
+        process.env.FIREBASE_SERVICE_ACCOUNT_CLIENT_EMAIL?.trim(),
+    );
+    const hasPrivateKey = Boolean(
+      process.env.FIREBASE_PRIVATE_KEY?.trim() ??
+        process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY?.trim(),
+    );
+    const hasJson = Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim());
+
+    let message =
+      "Firebase Admin env missing. Vercel에 아래 중 하나를 Production에 등록 후 Redeploy 하세요.";
+
+    if (hasPrivateKey && !hasEmail) {
+      message =
+        "FIREBASE_PRIVATE_KEY는 있는데 FIREBASE_CLIENT_EMAIL이 없습니다. client_email도 함께 등록하세요.";
+    } else if (hasEmail && !hasPrivateKey) {
+      message =
+        "FIREBASE_CLIENT_EMAIL은 있는데 FIREBASE_PRIVATE_KEY가 없습니다. private_key도 함께 등록하세요.";
+    } else if (hasJson) {
+      message =
+        "FIREBASE_SERVICE_ACCOUNT_JSON은 있지만 파싱/필드가 잘못됐습니다. JSON 전체를 한 줄로 넣거나 split 방식을 쓰세요.";
+    }
+
     return {
       configured: false,
       source,
       parseOk: false,
       initialized: false,
-      message:
-        "Firebase Admin env missing. Set FIREBASE_SERVICE_ACCOUNT_JSON (one-line JSON) or FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY.",
+      message,
     };
   }
 
