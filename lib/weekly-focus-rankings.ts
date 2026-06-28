@@ -1,5 +1,9 @@
 import "server-only";
 
+import type {
+  CollectionReference as AdminCollectionReference,
+  Firestore as AdminFirestore,
+} from "firebase-admin/firestore";
 import {
   collection,
   doc,
@@ -8,6 +12,8 @@ import {
   limit,
   orderBy,
   query as firestoreQuery,
+  type CollectionReference,
+  type Firestore,
 } from "firebase/firestore";
 
 import { getCurrentFocusWeekId } from "@/lib/focus-week";
@@ -26,9 +32,22 @@ const FOCUS_TIME_KEYS = [
   "score",
   "totalFocusTime",
   "value",
+  "focusSeconds",
+  "weeklyFocusSeconds",
 ] as const;
 
 const NICKNAME_KEYS = ["nickname", "displayName", "name", "userName"] as const;
+
+const SORT_FIELDS = [
+  "rank",
+  "focusTime",
+  "weeklyFocus",
+  "score",
+  "minutes",
+  "value",
+] as const;
+
+const LIVE_DOCUMENT_IDS = ["rankings", "live", "current", "data"] as const;
 
 function toNumber(value: unknown, fallback = 0): number {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -60,34 +79,18 @@ function pickNickname(data: Record<string, unknown>, fallback = ""): string {
   return fallback;
 }
 
-function resolveWeeklyFocusMinutes(
-  data: Record<string, unknown>,
-  weekId: string,
-): number {
-  const liveFocus = toNumber(data.weeklyFocus, NaN);
-  if (Number.isFinite(liveFocus) && liveFocus > 0) {
-    return liveFocus;
-  }
-
-  const flattenedKeys = [
-    `focusHistory.${weekId}`,
-    `weeklyFocus.${weekId}`,
-    `weeklyFocusTime.${weekId}`,
-  ];
-
-  for (const key of flattenedKeys) {
-    const value = toNumber(data[key], NaN);
-    if (Number.isFinite(value) && value > 0) {
-      return value;
-    }
-  }
-
-  return 0;
-}
-
 function finalizeRankings(entries: RankingEntry[]): RankingEntry[] {
-  return entries
-    .filter((entry) => entry.focusTime > 0 && entry.nickname)
+  const filtered = entries.filter((entry) => entry.focusTime > 0 && entry.nickname);
+
+  const hasExplicitRank = filtered.some((entry) => entry.rank > 0);
+  if (hasExplicitRank) {
+    return filtered
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, RANKING_LIMIT)
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
+  }
+
+  return filtered
     .sort((a, b) => b.focusTime - a.focusTime)
     .slice(0, RANKING_LIMIT)
     .map((entry, index) => ({ ...entry, rank: index + 1 }));
@@ -121,7 +124,7 @@ function mapRawEntry(
     highestFloor: toNumber(profileData.highestFloor),
     focusTime,
     combatPower: toNumber(profileData.combatPower),
-    rank: 0,
+    rank: toNumber(raw.rank),
   };
 }
 
@@ -145,9 +148,7 @@ function mapArrayLike(value: unknown): Record<string, unknown>[] {
   return [];
 }
 
-async function hydrateProfiles(
-  entries: RankingEntry[],
-): Promise<RankingEntry[]> {
+async function hydrateProfiles(entries: RankingEntry[]): Promise<RankingEntry[]> {
   if (entries.length === 0) {
     return entries;
   }
@@ -182,9 +183,7 @@ async function hydrateProfiles(
   return hydrated;
 }
 
-function mapRawRecords(
-  records: Record<string, unknown>[],
-): RankingEntry[] {
+function mapRawRecords(records: Record<string, unknown>[]): RankingEntry[] {
   return records
     .map((record) => {
       const id =
@@ -202,11 +201,9 @@ function mapRawRecords(
     .filter((entry): entry is RankingEntry => entry !== null);
 }
 
-async function fetchFromWeeklyRankingsDoc(
-  readDoc: (weekId: string) => Promise<Record<string, unknown> | null>,
-  weekId: string,
+async function fetchFromRankingDocument(
+  data: Record<string, unknown> | null,
 ): Promise<RankingEntry[]> {
-  const data = await readDoc(weekId);
   if (!data) {
     return [];
   }
@@ -218,46 +215,241 @@ async function fetchFromWeeklyRankingsDoc(
     }
   }
 
-  const direct = mapRawEntry(weekId, data);
+  const direct = mapRawEntry("leaderboard", data);
   return direct ? finalizeRankings([direct]) : [];
 }
 
-async function fetchFromWeeklyRankingsSubcollection(
-  readEntries: (weekId: string) => Promise<Record<string, unknown>[]>,
-  weekId: string,
-): Promise<RankingEntry[]> {
-  const records = await readEntries(weekId);
-  if (records.length === 0) {
-    return [];
+async function readClientCollectionRecords(
+  collectionRef: CollectionReference,
+): Promise<Record<string, unknown>[]> {
+  for (const field of SORT_FIELDS) {
+    for (const direction of ["asc", "desc"] as const) {
+      try {
+        const snapshot = await getDocs(
+          firestoreQuery(
+            collectionRef,
+            orderBy(field, direction),
+            limit(RANKING_LIMIT),
+          ),
+        );
+        if (!snapshot.empty) {
+          return snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() as Record<string, unknown>),
+          }));
+        }
+      } catch {
+        // try next sort
+      }
+    }
   }
 
-  return finalizeRankings(await hydrateProfiles(mapRawRecords(records)));
+  try {
+    const snapshot = await getDocs(
+      firestoreQuery(collectionRef, limit(RANKING_LIMIT)),
+    );
+    return snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...(docSnap.data() as Record<string, unknown>),
+    }));
+  } catch {
+    return [];
+  }
 }
 
-async function fetchFromRtdbPath(
-  readPath: (path: string) => Promise<unknown>,
-  weekId: string,
-): Promise<RankingEntry[]> {
-  const paths = [
-    `rankings/${weekId}/users`,
-    `rankings/${weekId}`,
-    `weeklyLeaderboards/${weekId}/focusTime`,
-    `weeklyLeaderboards/${weekId}`,
-    `weeklyFocusLeaderboard/${weekId}`,
-    `leaderboards/weeklyFocus/${weekId}`,
-    `weekly_rankings/${weekId}`,
-  ];
+async function readAdminCollectionRecords(
+  collectionRef: AdminCollectionReference,
+): Promise<Record<string, unknown>[]> {
+  for (const field of SORT_FIELDS) {
+    for (const direction of ["asc", "desc"] as const) {
+      try {
+        const snapshot = await collectionRef
+          .orderBy(field, direction)
+          .limit(RANKING_LIMIT)
+          .get();
+        if (!snapshot.empty) {
+          return snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...(docSnap.data() as Record<string, unknown>),
+          }));
+        }
+      } catch {
+        // try next sort
+      }
+    }
+  }
 
-  for (const path of paths) {
-    const value = await readPath(path);
-    const records = mapArrayLike(value);
+  try {
+    const snapshot = await collectionRef.limit(RANKING_LIMIT).get();
+    return snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...(docSnap.data() as Record<string, unknown>),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchFromCollectionCandidates(
+  readRecords: (ref: CollectionReference) => Promise<Record<string, unknown>[]>,
+  candidates: CollectionReference[],
+): Promise<RankingEntry[]> {
+  for (const candidate of candidates) {
+    const records = await readRecords(candidate);
     if (records.length === 0) {
       continue;
     }
 
-    const rankings = finalizeRankings(await hydrateProfiles(mapRawRecords(records)));
+    const rankings = finalizeRankings(
+      await hydrateProfiles(mapRawRecords(records)),
+    );
     if (rankings.length > 0) {
       return rankings;
+    }
+  }
+
+  return [];
+}
+
+async function fetchFromAdminCollectionCandidates(
+  candidates: AdminCollectionReference[],
+): Promise<RankingEntry[]> {
+  for (const candidate of candidates) {
+    const records = await readAdminCollectionRecords(candidate);
+    if (records.length === 0) {
+      continue;
+    }
+
+    const rankings = finalizeRankings(
+      await hydrateProfiles(mapRawRecords(records)),
+    );
+    if (rankings.length > 0) {
+      return rankings;
+    }
+  }
+
+  return [];
+}
+
+function getClientLiveCollectionCandidates(db: Firestore): CollectionReference[] {
+  const root = doc(db, "leaderboards", "weekly_focus");
+  return [
+    collection(root, "live", "live", "rankings"),
+    collection(root, "live", "current", "rankings"),
+    collection(root, "live"),
+  ];
+}
+
+function getClientWeekCollectionCandidates(
+  db: Firestore,
+  weekId: string,
+): CollectionReference[] {
+  const root = doc(db, "leaderboards", "weekly_focus");
+  return [collection(root, "weeks", weekId, "rankings")];
+}
+
+function getAdminLiveCollectionCandidates(
+  adminDb: AdminFirestore,
+): AdminCollectionReference[] {
+  const root = adminDb.collection("leaderboards").doc("weekly_focus");
+  return [
+    root.collection("live").doc("live").collection("rankings"),
+    root.collection("live").doc("current").collection("rankings"),
+    root.collection("live"),
+  ];
+}
+
+function getAdminWeekCollectionCandidates(
+  adminDb: AdminFirestore,
+  weekId: string,
+): AdminCollectionReference[] {
+  const root = adminDb.collection("leaderboards").doc("weekly_focus");
+  return [root.collection("weeks").doc(weekId).collection("rankings")];
+}
+
+async function fetchFromLiveDocumentsWithClient(
+  db: Firestore,
+): Promise<RankingEntry[]> {
+  for (const documentId of LIVE_DOCUMENT_IDS) {
+    try {
+      const snapshot = await getDoc(
+        doc(db, "leaderboards", "weekly_focus", "live", documentId),
+      );
+      if (!snapshot.exists()) {
+        continue;
+      }
+
+      const rankings = await fetchFromRankingDocument(
+        snapshot.data() as Record<string, unknown>,
+      );
+      if (rankings.length > 0) {
+        return rankings;
+      }
+    } catch {
+      // try next document id
+    }
+  }
+
+  return [];
+}
+
+async function fetchFromLiveDocumentsWithAdmin(
+  adminDb: AdminFirestore,
+): Promise<RankingEntry[]> {
+  const root = adminDb.collection("leaderboards").doc("weekly_focus");
+
+  for (const documentId of LIVE_DOCUMENT_IDS) {
+    try {
+      const snapshot = await root.collection("live").doc(documentId).get();
+      if (!snapshot.exists) {
+        continue;
+      }
+
+      const rankings = await fetchFromRankingDocument(
+        snapshot.data() as Record<string, unknown>,
+      );
+      if (rankings.length > 0) {
+        return rankings;
+      }
+    } catch {
+      // try next document id
+    }
+  }
+
+  return [];
+}
+
+async function fetchFromRtdbLive(): Promise<RankingEntry[]> {
+  const adminRtdb = getAdminDatabase();
+  if (!adminRtdb) {
+    return [];
+  }
+
+  const paths = [
+    "leaderboards/weekly_focus/live/rankings",
+    "leaderboards/weekly_focus/live",
+  ];
+
+  for (const path of paths) {
+    try {
+      const snapshot = await adminRtdb.ref(path).get();
+      if (!snapshot.exists()) {
+        continue;
+      }
+
+      const records = mapArrayLike(snapshot.val());
+      if (records.length === 0) {
+        continue;
+      }
+
+      const rankings = finalizeRankings(
+        await hydrateProfiles(mapRawRecords(records)),
+      );
+      if (rankings.length > 0) {
+        return rankings;
+      }
+    } catch {
+      // try next path
     }
   }
 
@@ -268,78 +460,30 @@ async function fetchWeeklyRankingsWithAdmin(
   weekId: string,
 ): Promise<RankingEntry[]> {
   const adminDb = getAdminFirestore();
-  const adminRtdb = getAdminDatabase();
-
-  if (adminDb) {
-    const fromDoc = await fetchFromWeeklyRankingsDoc(async (currentWeekId) => {
-      const snapshot = await adminDb
-        .collection("weekly_rankings")
-        .doc(currentWeekId)
-        .get();
-      return snapshot.exists ? (snapshot.data() as Record<string, unknown>) : null;
-    }, weekId);
-    if (fromDoc.length > 0) {
-      return fromDoc;
-    }
-
-    for (const subcollection of ["entries", "rankings", "users"]) {
-      const fromSub = await fetchFromWeeklyRankingsSubcollection(
-        async (currentWeekId) => {
-          const base = adminDb
-            .collection("weekly_rankings")
-            .doc(currentWeekId)
-            .collection(subcollection);
-
-          for (const field of [
-            "focusTime",
-            "weeklyFocus",
-            "score",
-            "minutes",
-          ]) {
-            try {
-              const snapshot = await base
-                .orderBy(field, "desc")
-                .limit(RANKING_LIMIT)
-                .get();
-
-              if (!snapshot.empty) {
-                return snapshot.docs.map((docSnap) => ({
-                  id: docSnap.id,
-                  ...(docSnap.data() as Record<string, unknown>),
-                }));
-              }
-            } catch {
-              // Try the next sort field.
-            }
-          }
-
-          try {
-            const snapshot = await base.limit(RANKING_LIMIT).get();
-            return snapshot.docs.map((docSnap) => ({
-              id: docSnap.id,
-              ...(docSnap.data() as Record<string, unknown>),
-            }));
-          } catch {
-            return [];
-          }
-        },
-        weekId,
-      );
-
-      if (fromSub.length > 0) {
-        return fromSub;
-      }
-    }
+  if (!adminDb) {
+    return fetchFromRtdbLive();
   }
 
-  if (adminRtdb) {
-    return fetchFromRtdbPath(async (path) => {
-      const snapshot = await adminRtdb.ref(path).get();
-      return snapshot.exists() ? snapshot.val() : null;
-    }, weekId);
+  const fromLiveCollections = await fetchFromAdminCollectionCandidates(
+    getAdminLiveCollectionCandidates(adminDb),
+  );
+  if (fromLiveCollections.length > 0) {
+    return fromLiveCollections;
   }
 
-  return [];
+  const fromLiveDocuments = await fetchFromLiveDocumentsWithAdmin(adminDb);
+  if (fromLiveDocuments.length > 0) {
+    return fromLiveDocuments;
+  }
+
+  const fromRtdb = await fetchFromRtdbLive();
+  if (fromRtdb.length > 0) {
+    return fromRtdb;
+  }
+
+  return fetchFromAdminCollectionCandidates(
+    getAdminWeekCollectionCandidates(adminDb, weekId),
+  );
 }
 
 async function fetchWeeklyRankingsWithClient(
@@ -347,109 +491,23 @@ async function fetchWeeklyRankingsWithClient(
 ): Promise<RankingEntry[]> {
   const db = getClientFirestore();
 
-  const fromDoc = await fetchFromWeeklyRankingsDoc(async (currentWeekId) => {
-    try {
-      const snapshot = await getDoc(doc(db, "weekly_rankings", currentWeekId));
-      return snapshot.exists()
-        ? (snapshot.data() as Record<string, unknown>)
-        : null;
-    } catch {
-      return null;
-    }
-  }, weekId);
-  if (fromDoc.length > 0) {
-    return fromDoc;
+  const fromLiveCollections = await fetchFromCollectionCandidates(
+    readClientCollectionRecords,
+    getClientLiveCollectionCandidates(db),
+  );
+  if (fromLiveCollections.length > 0) {
+    return fromLiveCollections;
   }
 
-  for (const subcollection of ["entries", "rankings", "users"]) {
-    const fromSub = await fetchFromWeeklyRankingsSubcollection(
-      async (currentWeekId) => {
-        try {
-          const snapshot = await getDocs(
-            firestoreQuery(
-              collection(db, "weekly_rankings", currentWeekId, subcollection),
-              limit(RANKING_LIMIT),
-            ),
-          );
-          return snapshot.docs.map((docSnap) => ({
-            id: docSnap.id,
-            ...(docSnap.data() as Record<string, unknown>),
-          }));
-        } catch {
-          return [];
-        }
-      },
-      weekId,
-    );
-
-    if (fromSub.length > 0) {
-      return fromSub;
-    }
+  const fromLiveDocuments = await fetchFromLiveDocumentsWithClient(db);
+  if (fromLiveDocuments.length > 0) {
+    return fromLiveDocuments;
   }
 
-  return [];
-}
-
-async function fetchFromPublicProfiles(
-  weekId: string,
-): Promise<RankingEntry[]> {
-  const db = getClientFirestore();
-
-  for (const orderField of [
-    "weeklyFocus",
-    `focusHistory.${weekId}`,
-    `weeklyFocus.${weekId}`,
-  ]) {
-    try {
-      const snapshot = await getDocs(
-        firestoreQuery(
-          collection(db, "public_profiles"),
-          orderBy(orderField, "desc"),
-          limit(RANKING_LIMIT),
-        ),
-      );
-
-      const entries = snapshot.docs
-        .map((docSnap) => {
-          const data = docSnap.data() as Record<string, unknown>;
-          const focusTime =
-            orderField === "weeklyFocus"
-              ? resolveWeeklyFocusMinutes(data, weekId)
-              : toNumber(data[orderField]);
-          return toRankingEntry(docSnap.id, data, focusTime);
-        })
-        .filter((entry): entry is RankingEntry => entry !== null && entry.focusTime > 0);
-
-      if (entries.length > 0) {
-        return finalizeRankings(entries);
-      }
-    } catch {
-      // Field/index may not exist yet for the current week.
-    }
-  }
-
-  return [];
-}
-
-function toRankingEntry(
-  id: string,
-  data: Record<string, unknown>,
-  focusTime: number,
-): RankingEntry | null {
-  const nickname = data.nickname;
-  if (typeof nickname !== "string" || !nickname.trim()) {
-    return null;
-  }
-
-  return {
-    id,
-    nickname: nickname.trim(),
-    level: toNumber(data.level),
-    highestFloor: toNumber(data.highestFloor),
-    focusTime,
-    combatPower: toNumber(data.combatPower),
-    rank: 0,
-  };
+  return fetchFromCollectionCandidates(
+    readClientCollectionRecords,
+    getClientWeekCollectionCandidates(db, weekId),
+  );
 }
 
 export async function fetchWeeklyFocusRanking(
@@ -458,7 +516,6 @@ export async function fetchWeeklyFocusRanking(
   const sources = [
     () => fetchWeeklyRankingsWithAdmin(weekId),
     () => fetchWeeklyRankingsWithClient(weekId),
-    () => fetchFromPublicProfiles(weekId),
   ];
 
   for (const load of sources) {
