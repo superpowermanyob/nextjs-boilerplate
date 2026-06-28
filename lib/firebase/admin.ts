@@ -1,21 +1,54 @@
 import "server-only";
 
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
+import { cert, getApps, initializeApp, type App, type ServiceAccount } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
 import { getFirestore } from "firebase-admin/firestore";
 
 let adminApp: App | undefined;
 
-function parseServiceAccount(): Record<string, string> | null {
+type ServiceAccountJson = {
+  project_id?: string;
+  client_email?: string;
+  private_key?: string;
+  [key: string]: unknown;
+};
+
+function normalizePrivateKey(serviceAccount: ServiceAccountJson): ServiceAccountJson {
+  if (typeof serviceAccount.private_key !== "string") {
+    return serviceAccount;
+  }
+
+  return {
+    ...serviceAccount,
+    private_key: serviceAccount.private_key.replace(/\\n/g, "\n"),
+  };
+}
+
+function parseServiceAccountJson(raw: string): ServiceAccountJson {
+  const trimmed = raw.trim();
+
+  try {
+    return normalizePrivateKey(JSON.parse(trimmed) as ServiceAccountJson);
+  } catch {
+    // Vercel 등에서 private_key의 \n 이 \\n 으로 이중 이스케이프된 경우
+    const unescaped = trimmed.replace(/\\n/g, "\n");
+    return normalizePrivateKey(JSON.parse(unescaped) as ServiceAccountJson);
+  }
+}
+
+function parseServiceAccount(): ServiceAccountJson | null {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
   if (!raw) {
     return null;
   }
 
   try {
-    return JSON.parse(raw) as Record<string, string>;
-  } catch {
-    console.warn("[firebase/admin] FIREBASE_SERVICE_ACCOUNT_JSON is invalid JSON");
+    return parseServiceAccountJson(raw);
+  } catch (error) {
+    console.warn(
+      "[firebase/admin] FIREBASE_SERVICE_ACCOUNT_JSON parse failed:",
+      error instanceof Error ? error.message : error,
+    );
     return null;
   }
 }
@@ -25,9 +58,8 @@ export function getAdminApp(): App | null {
     return adminApp;
   }
 
-  const existing = getApps()[0];
-  if (existing) {
-    adminApp = existing;
+  if (getApps().length > 0) {
+    adminApp = getApps()[0];
     return adminApp;
   }
 
@@ -37,9 +69,10 @@ export function getAdminApp(): App | null {
   }
 
   adminApp = initializeApp({
-    credential: cert(serviceAccount),
+    credential: cert(serviceAccount as ServiceAccount),
     databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    projectId:
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? serviceAccount.project_id,
   });
 
   return adminApp;
