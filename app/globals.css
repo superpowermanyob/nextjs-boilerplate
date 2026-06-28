@@ -12,6 +12,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@keyframes patchnotes-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.patchnotes-marquee {
+  display: inline-flex;
+  min-width: 200%;
+  animation: patchnotes-marquee 28s linear infinite;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

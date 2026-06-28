@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | 戦績 · ランキング",
+    "description": "Focus RPG のプレイヤー戦績検索とランキングボード",
+    "userTitle": "{nickname} | Focus RPG 戦績",
+    "userDescription": "{nickname} の詳細戦績、装備、称号情報"
+  },
+  "common": {
+    "search": "検索",
+    "searching": "検索中...",
+    "rank": "順位",
+    "nickname": "ニックネーム",
+    "level": "レベル",
+    "highestFloor": "最高階",
+    "focusTime": "集中時間",
+    "combatPower": "戦闘力",
+    "guild": "ギルド",
+    "members": "メンバー",
+    "floorUnit": "F",
+    "enhance": "強化",
+    "slots": "スロット",
+    "playerProfile": "プレイヤープロフィール"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "戦績 · ランキング",
+    "subtitle": "ニックネームで戦績を検索するか、リアルタイムランキングを確認してください。",
+    "searchPlaceholder": "プレイヤーのニックネームを入力",
+    "searchLabel": "プレイヤーニックネーム",
+    "rankingBoard": "ランキングボード",
+    "top100": "Top 100",
+    "top50Guilds": "Top 50 ギルド"
+  },
+  "tabs": {
+    "highestFloor": "タワー最高階ランキング",
+    "weeklyFocus": "週間集中ランキング",
+    "combatPower": "総合戦闘力ランキング",
+    "guild": "ギルド名誉の殿堂",
+    "metricHighestFloor": "最高階",
+    "metricFocusTime": "集中時間",
+    "metricCombatPower": "戦闘力",
+    "metricGuild": "ギルド"
+  },
+  "ranking": {
+    "loading": "ランキングデータを読み込み中...",
+    "empty": "表示するランキングデータがありません。",
+    "floor": "階数",
+    "focus": "集中",
+    "power": "戦闘力",
+    "avatarPlaceholder": "キャラクターサムネイルプレースホルダー"
+  },
+  "guild": {
+    "loading": "ギルドランキングを読み込み中...",
+    "empty": "表示するギルドランキングがありません。",
+    "guildName": "ギルド名",
+    "totalPower": "合計戦闘力",
+    "avgFloor": "平均最高階",
+    "topMember": "最高階プレイヤー"
+  },
+  "user": {
+    "backToRanking": "ランキングに戻る",
+    "honorTitle": "名誉称号",
+    "equippedTitle": "装備中",
+    "noTitle": "称号なし",
+    "equipment": "装備中のギア",
+    "prefix": "接頭辞",
+    "subOption": "サブオプション",
+    "noSubOption": "サブオプションなし",
+    "historyTitle": "階数ヒストリー",
+    "historyDescription": "今後、シーズン別最高階の推移グラフがここに表示されます。",
+    "skillTitle": "スキルツリー",
+    "skillDescription": "今後、ステータス強化とスキル分岐情報がここに表示されます。",
+    "guildPrefix": "ギルド"
+  },
+  "equipment": {
+    "weapon": "武器",
+    "armor": "防具",
+    "accessory": "装飾品",
+    "unequipped": "未装備"
+  },
+  "rarity": {
+    "common": "コモン",
+    "rare": "レア",
+    "epic": "エピック",
+    "legendary": "レジェンド"
+  },
+  "stats": {
+    "atk": "攻撃力",
+    "def": "防御力",
+    "hp": "HP",
+    "spd": "速度",
+    "luk": "運",
+    "focusMulti": "集中倍率",
+    "generic": "ステータス",
+    "subOption": "サブオプション"
+  },
+  "focus": {
+    "hoursMinutes": "{hours}時間{minutes}分",
+    "hoursOnly": "{hours}時間",
+    "minutes": "{minutes}分"
+  },
+  "errors": {
+    "nicknameRequired": "ニックネームを入力してください。",
+    "profileNotFound": "存在しないニックネームです。",
+    "network": "ネットワークエラーが発生しました。",
+    "rankingFailed": "ランキングを読み込めませんでした。",
+    "searchFailed": "検索中にエラーが発生しました。",
+    "searchNetwork": "ネットワークエラーです。しばらくしてから再試行してください。"
+  },
+  "community": {
+    "title": "コミュニティ",
+    "close": "ウィジェットを閉じる",
+    "open": "コミュニティ",
+    "discord": "💬 公式Discordへ",
+    "bugReport": "🐛 バグを報告する"
+  },
+  "notFound": {
+    "title": "プレイヤーが見つかりません",
+    "description": "存在しないニックネームか、非公開プロフィールです。",
+    "backHome": "ホームに戻る"
+  },
+  "search": {
+    "recentTitle": "最近の検索",
+    "noRecent": "最近の検索履歴がありません",
+    "favorite": "お気に入り",
+    "removeFavorite": "お気に入り解除",
+    "addFavorite": "お気に入り追加",
+    "favoriteBannerTitle": "お気に入りプレイヤー",
+    "viewProfile": "プロフィールを見る",
+    "clearRecent": "履歴を削除"
+  },
+  "countdown": {
+    "label": "週間ランキングリセット",
+    "resetIn": "リセットまで {days}日 {time}"
+  },
+  "banner": {
+    "patchNotes": "パッチノート"
+  },
+  "language": {
+    "select": "言語"
+  }
+}

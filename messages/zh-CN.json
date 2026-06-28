@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | 战绩 · 排行榜",
+    "description": "搜索 Focus RPG 玩家战绩并查看实时排行榜。",
+    "userTitle": "{nickname} | Focus RPG 战绩",
+    "userDescription": "{nickname} 的详细战绩、装备与称号信息。"
+  },
+  "common": {
+    "search": "搜索",
+    "searching": "搜索中...",
+    "rank": "排名",
+    "nickname": "昵称",
+    "level": "等级",
+    "highestFloor": "最高层",
+    "focusTime": "专注时间",
+    "combatPower": "战斗力",
+    "guild": "公会",
+    "members": "成员",
+    "floorUnit": "F",
+    "enhance": "强化",
+    "slots": "槽位",
+    "playerProfile": "玩家资料"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "战绩 · 排行榜",
+    "subtitle": "搜索玩家昵称或查看实时排行榜。",
+    "searchPlaceholder": "请输入玩家昵称",
+    "searchLabel": "玩家昵称",
+    "rankingBoard": "排行榜",
+    "top100": "前 100 名",
+    "top50Guilds": "前 50 公会"
+  },
+  "tabs": {
+    "highestFloor": "塔最高层排行",
+    "weeklyFocus": "每周专注排行",
+    "combatPower": "综合战斗力排行",
+    "guild": "公会荣誉殿堂",
+    "metricHighestFloor": "最高层",
+    "metricFocusTime": "专注时间",
+    "metricCombatPower": "战斗力",
+    "metricGuild": "公会"
+  },
+  "ranking": {
+    "loading": "正在加载排行数据...",
+    "empty": "暂无排行数据。",
+    "floor": "层数",
+    "focus": "专注",
+    "power": "战斗力",
+    "avatarPlaceholder": "角色缩略图占位"
+  },
+  "guild": {
+    "loading": "正在加载公会排行...",
+    "empty": "暂无公会排行数据。",
+    "guildName": "公会名",
+    "totalPower": "总战斗力",
+    "avgFloor": "平均最高层",
+    "topMember": "最高层玩家"
+  },
+  "user": {
+    "backToRanking": "返回排行榜",
+    "honorTitle": "荣誉称号",
+    "equippedTitle": "已装备",
+    "noTitle": "无称号",
+    "equipment": "已装备物品",
+    "prefix": "前缀",
+    "subOption": "副属性",
+    "noSubOption": "无副属性",
+    "historyTitle": "层数历史",
+    "historyDescription": "未来将在此显示各赛季最高层趋势图。",
+    "skillTitle": "技能树",
+    "skillDescription": "未来将在此显示属性升级与技能分支信息。",
+    "guildPrefix": "公会"
+  },
+  "equipment": {
+    "weapon": "武器",
+    "armor": "防具",
+    "accessory": "饰品",
+    "unequipped": "未装备"
+  },
+  "rarity": {
+    "common": "普通",
+    "rare": "稀有",
+    "epic": "史诗",
+    "legendary": "传说"
+  },
+  "stats": {
+    "atk": "攻击力",
+    "def": "防御力",
+    "hp": "生命值",
+    "spd": "速度",
+    "luk": "幸运",
+    "focusMulti": "专注倍率",
+    "generic": "属性",
+    "subOption": "副属性"
+  },
+  "focus": {
+    "hoursMinutes": "{hours}小时{minutes}分",
+    "hoursOnly": "{hours}小时",
+    "minutes": "{minutes}分"
+  },
+  "errors": {
+    "nicknameRequired": "请输入昵称。",
+    "profileNotFound": "昵称不存在。",
+    "network": "发生网络错误。",
+    "rankingFailed": "无法加载排行榜。",
+    "searchFailed": "搜索失败。",
+    "searchNetwork": "网络错误，请稍后重试。"
+  },
+  "community": {
+    "title": "社区",
+    "close": "关闭小部件",
+    "open": "社区",
+    "discord": "💬 官方 Discord",
+    "bugReport": "🐛 向开发者报告 Bug"
+  },
+  "notFound": {
+    "title": "未找到玩家",
+    "description": "昵称不存在或资料未公开。",
+    "backHome": "返回首页"
+  },
+  "search": {
+    "recentTitle": "最近搜索",
+    "noRecent": "暂无搜索记录",
+    "favorite": "收藏",
+    "removeFavorite": "取消收藏",
+    "addFavorite": "添加收藏",
+    "favoriteBannerTitle": "我的收藏",
+    "viewProfile": "查看资料",
+    "clearRecent": "清空"
+  },
+  "countdown": {
+    "label": "每周排行重置",
+    "resetIn": "距离重置还有 {days} 天 {time}"
+  },
+  "banner": {
+    "patchNotes": "更新公告"
+  },
+  "language": {
+    "select": "语言"
+  }
+}

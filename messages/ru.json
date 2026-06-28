@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | Статистика · Рейтинг",
+    "description": "Поиск статистики игроков Focus RPG и таблицы рейтингов в реальном времени.",
+    "userTitle": "{nickname} | Статистика Focus RPG",
+    "userDescription": "Подробная статистика, экипировка и титулы игрока {nickname}."
+  },
+  "common": {
+    "search": "Поиск",
+    "searching": "Поиск...",
+    "rank": "Место",
+    "nickname": "Ник",
+    "level": "Уровень",
+    "highestFloor": "Лучший этаж",
+    "focusTime": "Время фокуса",
+    "combatPower": "Боевая сила",
+    "guild": "Гильдия",
+    "members": "Участники",
+    "floorUnit": "F",
+    "enhance": "Улуч.",
+    "slots": "Слоты",
+    "playerProfile": "Профиль игрока"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "Статистика · Рейтинг",
+    "subtitle": "Ищите статистику по нику или смотрите рейтинг в реальном времени.",
+    "searchPlaceholder": "Введите ник игрока",
+    "searchLabel": "Ник игрока",
+    "rankingBoard": "Таблица рейтинга",
+    "top100": "Топ 100",
+    "top50Guilds": "Топ 50 гильдий"
+  },
+  "tabs": {
+    "highestFloor": "Рейтинг лучшего этажа",
+    "weeklyFocus": "Недельный фокус",
+    "combatPower": "Боевая сила",
+    "guild": "Зал славы гильдий",
+    "metricHighestFloor": "Лучший этаж",
+    "metricFocusTime": "Время фокуса",
+    "metricCombatPower": "Боевая сила",
+    "metricGuild": "Гильдия"
+  },
+  "ranking": {
+    "loading": "Загрузка рейтинга...",
+    "empty": "Нет данных рейтинга.",
+    "floor": "Этаж",
+    "focus": "Фокус",
+    "power": "Сила",
+    "avatarPlaceholder": "Заглушка аватара персонажа"
+  },
+  "guild": {
+    "loading": "Загрузка рейтинга гильдий...",
+    "empty": "Нет данных рейтинга гильдий.",
+    "guildName": "Гильдия",
+    "totalPower": "Суммарная сила",
+    "avgFloor": "Средний этаж",
+    "topMember": "Лучший игрок"
+  },
+  "user": {
+    "backToRanking": "Назад к рейтингу",
+    "honorTitle": "Почётный титул",
+    "equippedTitle": "Надето",
+    "noTitle": "Без титула",
+    "equipment": "Экипировка",
+    "prefix": "Префикс",
+    "subOption": "Доп. статы",
+    "noSubOption": "Нет доп. статов",
+    "historyTitle": "История этажей",
+    "historyDescription": "Здесь появится график лучших этажей по сезонам.",
+    "skillTitle": "Дерево навыков",
+    "skillDescription": "Здесь появится информация об улучшениях и ветках навыков.",
+    "guildPrefix": "Гильдия"
+  },
+  "equipment": {
+    "weapon": "Оружие",
+    "armor": "Броня",
+    "accessory": "Аксессуар",
+    "unequipped": "Пусто"
+  },
+  "rarity": {
+    "common": "Обычный",
+    "rare": "Редкий",
+    "epic": "Эпический",
+    "legendary": "Легендарный"
+  },
+  "stats": {
+    "atk": "Атака",
+    "def": "Защита",
+    "hp": "HP",
+    "spd": "Скорость",
+    "luk": "Удача",
+    "focusMulti": "Множитель фокуса",
+    "generic": "Стата",
+    "subOption": "Доп. стат"
+  },
+  "focus": {
+    "hoursMinutes": "{hours} ч {minutes} мин",
+    "hoursOnly": "{hours} ч",
+    "minutes": "{minutes} мин"
+  },
+  "errors": {
+    "nicknameRequired": "Введите ник.",
+    "profileNotFound": "Ник не найден.",
+    "network": "Ошибка сети.",
+    "rankingFailed": "Не удалось загрузить рейтинг.",
+    "searchFailed": "Ошибка поиска.",
+    "searchNetwork": "Ошибка сети. Попробуйте позже."
+  },
+  "community": {
+    "title": "Сообщество",
+    "close": "Закрыть виджет",
+    "open": "Сообщество",
+    "discord": "💬 Официальный Discord",
+    "bugReport": "🐛 Сообщить об ошибке"
+  },
+  "notFound": {
+    "title": "Игрок не найден",
+    "description": "Ник не существует или профиль скрыт.",
+    "backHome": "На главную"
+  },
+  "search": {
+    "recentTitle": "Недавние поиски",
+    "noRecent": "Нет недавних поисков",
+    "favorite": "Избранное",
+    "removeFavorite": "Убрать из избранного",
+    "addFavorite": "Добавить в избранное",
+    "favoriteBannerTitle": "Избранный игрок",
+    "viewProfile": "Открыть профиль",
+    "clearRecent": "Очистить"
+  },
+  "countdown": {
+    "label": "Сброс недельного рейтинга",
+    "resetIn": "До сброса: {days} д. {time}"
+  },
+  "banner": {
+    "patchNotes": "Патч-ноут"
+  },
+  "language": {
+    "select": "Язык"
+  }
+}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus RPG Admin Monitoring</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #1c1c1f;
+        --panel: #282830;
+        --border: #3d3d4a;
+        --text: #cdd2dc;
+        --accent: #5383e8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        color: #fff;
+      }
+
+      p {
+        color: #9aa0ae;
+      }
+
+      section {
+        margin-top: 24px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--panel);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      input,
+      textarea,
+      button {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #1c1c1f;
+        color: #fff;
+        font: inherit;
+      }
+
+      input,
+      textarea {
+        padding: 12px 14px;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      button {
+        margin-top: 12px;
+        padding: 12px 16px;
+        background: var(--accent);
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        filter: brightness(1.08);
+      }
+
+      .status {
+        margin-top: 12px;
+        min-height: 20px;
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Focus RPG Admin Monitoring</h1>
+      <p>Firestore `settings/banner` 문서를 수정해 메인 페이지 전광판을 업데이트합니다.</p>
+
+      <section>
+        <h2>Firebase 설정</h2>
+        <div class="grid">
+          <div>
+            <label for="apiKey">API Key</label>
+            <input id="apiKey" type="text" placeholder="NEXT_PUBLIC_FIREBASE_API_KEY" />
+          </div>
+          <div>
+            <label for="projectId">Project ID</label>
+            <input id="projectId" type="text" placeholder="NEXT_PUBLIC_FIREBASE_PROJECT_ID" />
+          </div>
+          <div>
+            <label for="appId">App ID</label>
+            <input id="appId" type="text" placeholder="NEXT_PUBLIC_FIREBASE_APP_ID" />
+          </div>
+        </div>
+        <button id="saveConfigBtn" type="button">Firebase 설정 저장</button>
+        <div id="configStatus" class="status"></div>
+      </section>
+
+      <section>
+        <h2>패치노트 전광판</h2>
+        <label for="bannerText">배너 텍스트</label>
+        <textarea
+          id="bannerText"
+          placeholder="예: v1.2.0 업데이트: 신규 보스 층 추가, 밸런스 조정"
+        ></textarea>
+        <button id="updateBannerBtn" type="button">배너 업데이트</button>
+        <div id="bannerStatus" class="status"></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+      const CONFIG_KEY = "focus-rpg-admin-firebase-config";
+      const fields = ["apiKey", "projectId", "appId"];
+
+      function readConfig() {
+        try {
+          return JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function saveConfig() {
+        const config = Object.fromEntries(
+          fields.map((field) => [field, document.getElementById(field).value.trim()]),
+        );
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+        return config;
+      }
+
+      function fillConfigForm(config) {
+        fields.forEach((field) => {
+          document.getElementById(field).value = config[field] || "";
+        });
+      }
+
+      function getFirebaseApp() {
+        const config = readConfig();
+        if (!config.apiKey || !config.projectId || !config.appId) {
+          throw new Error("Firebase 설정을 먼저 저장해 주세요.");
+        }
+
+        return initializeApp({
+          apiKey: config.apiKey,
+          authDomain: `${config.projectId}.firebaseapp.com`,
+          projectId: config.projectId,
+          appId: config.appId,
+        });
+      }
+
+      async function loadBanner() {
+        const app = getFirebaseApp();
+        const db = getFirestore(app);
+        const snapshot = await getDoc(doc(db, "settings", "banner"));
+        if (!snapshot.exists()) {
+          return;
+        }
+
+        const data = snapshot.data();
+        document.getElementById("bannerText").value =
+          data.text || data.message || data.content || "";
+      }
+
+      document.getElementById("saveConfigBtn").addEventListener("click", () => {
+        const config = saveConfig();
+        document.getElementById("configStatus").textContent =
+          config.apiKey && config.projectId && config.appId
+            ? "Firebase 설정이 저장되었습니다."
+            : "모든 Firebase 설정 값을 입력해 주세요.";
+      });
+
+      document.getElementById("updateBannerBtn").addEventListener("click", async () => {
+        const status = document.getElementById("bannerStatus");
+        const text = document.getElementById("bannerText").value.trim();
+
+        if (!text) {
+          status.textContent = "배너 텍스트를 입력해 주세요.";
+          return;
+        }
+
+        try {
+          const app = getFirebaseApp();
+          const db = getFirestore(app);
+          await setDoc(
+            doc(db, "settings", "banner"),
+            {
+              text,
+              enabled: true,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true },
+          );
+          status.textContent = "배너가 업데이트되었습니다.";
+        } catch (error) {
+          status.textContent =
+            error instanceof Error ? error.message : "배너 업데이트에 실패했습니다.";
+        }
+      });
+
+      fillConfigForm(readConfig());
+      loadBanner().catch((error) => {
+        document.getElementById("bannerStatus").textContent =
+          error instanceof Error ? error.message : "배너를 불러오지 못했습니다.";
+      });
+    </script>
+  </body>
+</html>

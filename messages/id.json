@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | Statistik · Peringkat",
+    "description": "Cari statistik pemain Focus RPG dan lihat papan peringkat langsung.",
+    "userTitle": "{nickname} | Statistik Focus RPG",
+    "userDescription": "Statistik detail, gear, dan gelar untuk {nickname}."
+  },
+  "common": {
+    "search": "Cari",
+    "searching": "Mencari...",
+    "rank": "Peringkat",
+    "nickname": "Nickname",
+    "level": "Level",
+    "highestFloor": "Lantai Tertinggi",
+    "focusTime": "Waktu Fokus",
+    "combatPower": "Kekuatan Tempur",
+    "guild": "Guild",
+    "members": "Anggota",
+    "floorUnit": "F",
+    "enhance": "Enh.",
+    "slots": "Slot",
+    "playerProfile": "Profil Pemain"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "Statistik · Peringkat",
+    "subtitle": "Cari statistik pemain atau lihat papan peringkat langsung.",
+    "searchPlaceholder": "Masukkan nickname pemain",
+    "searchLabel": "Nickname pemain",
+    "rankingBoard": "Papan Peringkat",
+    "top100": "Top 100",
+    "top50Guilds": "Top 50 Guild"
+  },
+  "tabs": {
+    "highestFloor": "Peringkat Lantai Tertinggi",
+    "weeklyFocus": "Peringkat Fokus Mingguan",
+    "combatPower": "Peringkat Kekuatan Tempur",
+    "guild": "Balai Kehormatan Guild",
+    "metricHighestFloor": "Lantai Tertinggi",
+    "metricFocusTime": "Waktu Fokus",
+    "metricCombatPower": "Kekuatan Tempur",
+    "metricGuild": "Guild"
+  },
+  "ranking": {
+    "loading": "Memuat data peringkat...",
+    "empty": "Tidak ada data peringkat.",
+    "floor": "Lantai",
+    "focus": "Fokus",
+    "power": "Kekuatan",
+    "avatarPlaceholder": "Placeholder thumbnail karakter"
+  },
+  "guild": {
+    "loading": "Memuat peringkat guild...",
+    "empty": "Tidak ada data peringkat guild.",
+    "guildName": "Nama Guild",
+    "totalPower": "Total Kekuatan",
+    "avgFloor": "Rata-rata Lantai",
+    "topMember": "Pendaki Teratas"
+  },
+  "user": {
+    "backToRanking": "Kembali ke Peringkat",
+    "honorTitle": "Gelar Kehormatan",
+    "equippedTitle": "Dipakai",
+    "noTitle": "Tanpa Gelar",
+    "equipment": "Gear Terpasang",
+    "prefix": "Awalan",
+    "subOption": "Sub Stat",
+    "noSubOption": "Tidak ada sub stat",
+    "historyTitle": "Riwayat Lantai",
+    "historyDescription": "Grafik tren lantai tertinggi per musim akan ditampilkan di sini.",
+    "skillTitle": "Pohon Skill",
+    "skillDescription": "Info upgrade stat dan cabang skill akan ditampilkan di sini.",
+    "guildPrefix": "Guild"
+  },
+  "equipment": {
+    "weapon": "Senjata",
+    "armor": "Armor",
+    "accessory": "Aksesori",
+    "unequipped": "Kosong"
+  },
+  "rarity": {
+    "common": "Biasa",
+    "rare": "Langka",
+    "epic": "Epik",
+    "legendary": "Legendaris"
+  },
+  "stats": {
+    "atk": "Serangan",
+    "def": "Pertahanan",
+    "hp": "HP",
+    "spd": "Kecepatan",
+    "luk": "Keberuntungan",
+    "focusMulti": "Pengali Fokus",
+    "generic": "Stat",
+    "subOption": "Sub stat"
+  },
+  "focus": {
+    "hoursMinutes": "{hours} jam {minutes} menit",
+    "hoursOnly": "{hours} jam",
+    "minutes": "{minutes} menit"
+  },
+  "errors": {
+    "nicknameRequired": "Silakan masukkan nickname.",
+    "profileNotFound": "Nickname tidak ditemukan.",
+    "network": "Terjadi kesalahan jaringan.",
+    "rankingFailed": "Gagal memuat peringkat.",
+    "searchFailed": "Pencarian gagal.",
+    "searchNetwork": "Kesalahan jaringan. Coba lagi nanti."
+  },
+  "community": {
+    "title": "Komunitas",
+    "close": "Tutup widget",
+    "open": "Komunitas",
+    "discord": "💬 Discord Resmi",
+    "bugReport": "🐛 Laporkan Bug"
+  },
+  "notFound": {
+    "title": "Pemain tidak ditemukan",
+    "description": "Nickname tidak ada atau profil bersifat privat.",
+    "backHome": "Kembali ke Beranda"
+  },
+  "search": {
+    "recentTitle": "Pencarian terbaru",
+    "noRecent": "Belum ada riwayat pencarian",
+    "favorite": "Favorit",
+    "removeFavorite": "Hapus favorit",
+    "addFavorite": "Tambah favorit",
+    "favoriteBannerTitle": "Pemain favorit Anda",
+    "viewProfile": "Lihat profil",
+    "clearRecent": "Hapus"
+  },
+  "countdown": {
+    "label": "Reset peringkat mingguan",
+    "resetIn": "Reset dalam {days} hari {time}"
+  },
+  "banner": {
+    "patchNotes": "Catatan Patch"
+  },
+  "language": {
+    "select": "Bahasa"
+  }
+}

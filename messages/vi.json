@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | Thành tích · Xếp hạng",
+    "description": "Tra cứu thành tích người chơi Focus RPG và bảng xếp hạng trực tiếp.",
+    "userTitle": "{nickname} | Thành tích Focus RPG",
+    "userDescription": "Thành tích chi tiết, trang bị và danh hiệu của {nickname}."
+  },
+  "common": {
+    "search": "Tìm kiếm",
+    "searching": "Đang tìm...",
+    "rank": "Hạng",
+    "nickname": "Biệt danh",
+    "level": "Cấp",
+    "highestFloor": "Tầng cao nhất",
+    "focusTime": "Thời gian tập trung",
+    "combatPower": "Lực chiến",
+    "guild": "Bang hội",
+    "members": "Thành viên",
+    "floorUnit": "F",
+    "enhance": "Cường hóa",
+    "slots": "Ô trang bị",
+    "playerProfile": "Hồ sơ người chơi"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "Thành tích · Xếp hạng",
+    "subtitle": "Tìm thành tích theo biệt danh hoặc xem bảng xếp hạng trực tiếp.",
+    "searchPlaceholder": "Nhập biệt danh người chơi",
+    "searchLabel": "Biệt danh người chơi",
+    "rankingBoard": "Bảng xếp hạng",
+    "top100": "Top 100",
+    "top50Guilds": "Top 50 bang hội"
+  },
+  "tabs": {
+    "highestFloor": "Xếp hạng tầng cao nhất",
+    "weeklyFocus": "Xếp hạng tập trung tuần",
+    "combatPower": "Xếp hạng lực chiến",
+    "guild": "Điện danh vọng bang hội",
+    "metricHighestFloor": "Tầng cao nhất",
+    "metricFocusTime": "Thời gian tập trung",
+    "metricCombatPower": "Lực chiến",
+    "metricGuild": "Bang hội"
+  },
+  "ranking": {
+    "loading": "Đang tải dữ liệu xếp hạng...",
+    "empty": "Không có dữ liệu xếp hạng.",
+    "floor": "Tầng",
+    "focus": "Tập trung",
+    "power": "Lực chiến",
+    "avatarPlaceholder": "Ảnh đại diện nhân vật"
+  },
+  "guild": {
+    "loading": "Đang tải xếp hạng bang hội...",
+    "empty": "Không có dữ liệu xếp hạng bang hội.",
+    "guildName": "Tên bang",
+    "totalPower": "Tổng lực chiến",
+    "avgFloor": "TB tầng cao nhất",
+    "topMember": "Người leo cao nhất"
+  },
+  "user": {
+    "backToRanking": "Quay lại xếp hạng",
+    "honorTitle": "Danh hiệu danh dự",
+    "equippedTitle": "Đang trang bị",
+    "noTitle": "Không có danh hiệu",
+    "equipment": "Trang bị đang mặc",
+    "prefix": "Tiền tố",
+    "subOption": "Thuộc tính phụ",
+    "noSubOption": "Không có thuộc tính phụ",
+    "historyTitle": "Lịch sử tầng",
+    "historyDescription": "Biểu đồ xu hướng tầng cao nhất theo mùa sẽ hiển thị tại đây.",
+    "skillTitle": "Cây kỹ năng",
+    "skillDescription": "Thông tin nâng cấp chỉ số và nhánh kỹ năng sẽ hiển thị tại đây.",
+    "guildPrefix": "Bang hội"
+  },
+  "equipment": {
+    "weapon": "Vũ khí",
+    "armor": "Giáp",
+    "accessory": "Phụ kiện",
+    "unequipped": "Chưa trang bị"
+  },
+  "rarity": {
+    "common": "Thường",
+    "rare": "Hiếm",
+    "epic": "Sử thi",
+    "legendary": "Huyền thoại"
+  },
+  "stats": {
+    "atk": "Tấn công",
+    "def": "Phòng thủ",
+    "hp": "Máu",
+    "spd": "Tốc độ",
+    "luk": "May mắn",
+    "focusMulti": "Hệ số tập trung",
+    "generic": "Chỉ số",
+    "subOption": "Thuộc tính phụ"
+  },
+  "focus": {
+    "hoursMinutes": "{hours} giờ {minutes} phút",
+    "hoursOnly": "{hours} giờ",
+    "minutes": "{minutes} phút"
+  },
+  "errors": {
+    "nicknameRequired": "Vui lòng nhập biệt danh.",
+    "profileNotFound": "Biệt danh không tồn tại.",
+    "network": "Đã xảy ra lỗi mạng.",
+    "rankingFailed": "Không thể tải xếp hạng.",
+    "searchFailed": "Tìm kiếm thất bại.",
+    "searchNetwork": "Lỗi mạng. Vui lòng thử lại sau."
+  },
+  "community": {
+    "title": "Cộng đồng",
+    "close": "Đóng widget",
+    "open": "Cộng đồng",
+    "discord": "💬 Discord chính thức",
+    "bugReport": "🐛 Báo lỗi cho nhà phát triển"
+  },
+  "notFound": {
+    "title": "Không tìm thấy người chơi",
+    "description": "Biệt danh không tồn tại hoặc hồ sơ đang riêng tư.",
+    "backHome": "Về trang chủ"
+  },
+  "search": {
+    "recentTitle": "Tìm kiếm gần đây",
+    "noRecent": "Không có lịch sử tìm kiếm",
+    "favorite": "Yêu thích",
+    "removeFavorite": "Bỏ yêu thích",
+    "addFavorite": "Thêm yêu thích",
+    "favoriteBannerTitle": "Người chơi yêu thích",
+    "viewProfile": "Xem hồ sơ",
+    "clearRecent": "Xóa"
+  },
+  "countdown": {
+    "label": "Đặt lại xếp hạng tuần",
+    "resetIn": "Còn {days} ngày {time} để đặt lại"
+  },
+  "banner": {
+    "patchNotes": "Ghi chú bản vá"
+  },
+  "language": {
+    "select": "Ngôn ngữ"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "meta": {
+    "title": "Focus RPG | 전적 · 랭킹",
+    "description": "Focus RPG 플레이어 전적 검색 및 랭킹 보드",
+    "userTitle": "{nickname} | Focus RPG 전적",
+    "userDescription": "{nickname} 플레이어의 상세 전적, 장비, 칭호 정보"
+  },
+  "common": {
+    "search": "검색",
+    "searching": "검색 중...",
+    "rank": "순위",
+    "nickname": "닉네임",
+    "level": "레벨",
+    "highestFloor": "최고층",
+    "focusTime": "집중 시간",
+    "combatPower": "전투력",
+    "guild": "길드",
+    "members": "길드원",
+    "floorUnit": "F",
+    "enhance": "강화",
+    "slots": "슬롯",
+    "playerProfile": "플레이어 프로필"
+  },
+  "home": {
+    "badge": "Focus RPG",
+    "title": "전적 · 랭킹",
+    "subtitle": "닉네임으로 전적을 검색하거나, 실시간 랭킹 보드를 확인하세요.",
+    "searchPlaceholder": "플레이어 닉네임을 입력하세요",
+    "searchLabel": "플레이어 닉네임",
+    "rankingBoard": "랭킹 보드",
+    "top100": "Top 100",
+    "top50Guilds": "Top 50 길드"
+  },
+  "tabs": {
+    "highestFloor": "탑 최고층 랭킹",
+    "weeklyFocus": "주간 집중 랭킹",
+    "combatPower": "종합 전투력 랭킹",
+    "guild": "길드 명예의 전당",
+    "metricHighestFloor": "최고층",
+    "metricFocusTime": "집중 시간",
+    "metricCombatPower": "전투력",
+    "metricGuild": "길드"
+  },
+  "ranking": {
+    "loading": "랭킹 데이터를 불러오는 중...",
+    "empty": "표시할 랭킹 데이터가 없습니다.",
+    "floor": "층수",
+    "focus": "집중",
+    "power": "전투력",
+    "avatarPlaceholder": "캐릭터 썸네일 Placeholder"
+  },
+  "guild": {
+    "loading": "길드 랭킹을 불러오는 중...",
+    "empty": "표시할 길드 랭킹 데이터가 없습니다.",
+    "guildName": "길드명",
+    "totalPower": "합산 전투력",
+    "avgFloor": "평균 최고층",
+    "topMember": "최고 층 유저"
+  },
+  "user": {
+    "backToRanking": "랭킹으로 돌아가기",
+    "honorTitle": "명예 칭호",
+    "equippedTitle": "장착 중",
+    "noTitle": "칭호 없음",
+    "equipment": "장착 장비",
+    "prefix": "접두사",
+    "subOption": "부옵션",
+    "noSubOption": "부옵션 없음",
+    "historyTitle": "층수 히스토리",
+    "historyDescription": "향후 시즌별 최고층 추이 그래프가 이 영역에 표시됩니다.",
+    "skillTitle": "스킬 트리",
+    "skillDescription": "향후 스탯 업그레이드 및 스킬 분기 정보가 이 영역에 표시됩니다.",
+    "guildPrefix": "길드"
+  },
+  "equipment": {
+    "weapon": "무기",
+    "armor": "방어구",
+    "accessory": "장신구",
+    "unequipped": "미장착"
+  },
+  "rarity": {
+    "common": "일반",
+    "rare": "레어",
+    "epic": "에픽",
+    "legendary": "전설"
+  },
+  "stats": {
+    "atk": "공격력",
+    "def": "방어력",
+    "hp": "체력",
+    "spd": "속도",
+    "luk": "운",
+    "focusMulti": "집중 배율",
+    "generic": "스탯",
+    "subOption": "부옵션"
+  },
+  "focus": {
+    "hoursMinutes": "{hours}시간 {minutes}분",
+    "hoursOnly": "{hours}시간",
+    "minutes": "{minutes}분"
+  },
+  "errors": {
+    "nicknameRequired": "닉네임을 입력해 주세요.",
+    "profileNotFound": "존재하지 않는 닉네임입니다.",
+    "network": "네트워크 오류가 발생했습니다.",
+    "rankingFailed": "랭킹을 불러오지 못했습니다.",
+    "searchFailed": "검색 중 오류가 발생했습니다.",
+    "searchNetwork": "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+  },
+  "community": {
+    "title": "커뮤니티",
+    "close": "위젯 닫기",
+    "open": "커뮤니티",
+    "discord": "💬 공식 디스코드 바로가기",
+    "bugReport": "🐛 개발자에게 버그 제보하기"
+  },
+  "notFound": {
+    "title": "플레이어를 찾을 수 없습니다",
+    "description": "존재하지 않는 닉네임이거나 비공개 프로필입니다.",
+    "backHome": "메인으로 돌아가기"
+  },
+  "search": {
+    "recentTitle": "최근 검색",
+    "noRecent": "최근 검색 기록이 없습니다",
+    "favorite": "즐겨찾기",
+    "removeFavorite": "즐겨찾기 해제",
+    "addFavorite": "즐겨찾기 추가",
+    "favoriteBannerTitle": "내 즐겨찾기",
+    "viewProfile": "프로필 보기",
+    "clearRecent": "전체 삭제"
+  },
+  "countdown": {
+    "label": "주간 랭킹 초기화",
+    "resetIn": "초기화까지 {days}일 {time} 남음"
+  },
+  "banner": {
+    "patchNotes": "패치노트"
+  },
+  "language": {
+    "select": "언어"
+  }
+}
