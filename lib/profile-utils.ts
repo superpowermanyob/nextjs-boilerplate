@@ -1,4 +1,6 @@
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/locales";
+import { resolveLocalizedItemName } from "@/lib/item-names";
 
 export type PublicProfile = {
   id: string;
@@ -20,7 +22,8 @@ export type EquipmentOption = {
 
 export type ParsedEquipment = {
   slotKey: EquipmentSlotKey;
-  name: string;
+  itemId: string;
+  nameKo: string;
   nameEn: string;
   rarity: string;
   enhancementLevel: number;
@@ -120,7 +123,8 @@ function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEqu
   if (item === null || item === undefined) {
     return {
       slotKey,
-      name: "",
+      itemId: "",
+      nameKo: "",
       nameEn: "",
       rarity: "",
       enhancementLevel: 0,
@@ -131,10 +135,12 @@ function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEqu
   }
 
   if (typeof item !== "object") {
+    const fallback = String(item);
     return {
       slotKey,
-      name: String(item),
-      nameEn: "",
+      itemId: "",
+      nameKo: fallback,
+      nameEn: fallback,
       rarity: "",
       enhancementLevel: 0,
       prefixes: [],
@@ -158,7 +164,8 @@ function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEqu
 
   return {
     slotKey,
-    name: pickString(record, ["nameKo", "nameEn", "name"], ""),
+    itemId: pickString(record, ["id", "itemId"], ""),
+    nameKo: pickString(record, ["nameKo"], ""),
     nameEn: pickString(record, ["nameEn"], ""),
     rarity,
     enhancementLevel: pickNumber(record, ["enhancementLevel", "enhance"]) ?? 0,
@@ -166,6 +173,28 @@ function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEqu
     options,
     empty: false,
   };
+}
+
+export function getLocalizedEquipmentName(
+  item: ParsedEquipment,
+  locale: Locale,
+): string {
+  if (item.empty) {
+    return "";
+  }
+
+  if (typeof item !== "object") {
+    return "";
+  }
+
+  return resolveLocalizedItemName(
+    {
+      id: item.itemId,
+      nameKo: item.nameKo,
+      nameEn: item.nameEn,
+    },
+    locale,
+  );
 }
 
 export function extractEquipment(profile: PublicProfile): ParsedEquipment[] {

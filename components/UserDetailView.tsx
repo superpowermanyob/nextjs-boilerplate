@@ -19,6 +19,7 @@ import {
   formatEquipmentOption,
   formatRarity,
   getEquipmentSlotLabel,
+  getLocalizedEquipmentName,
   getRarityColorClass,
   pickNumber,
   pickString,
@@ -51,7 +52,7 @@ function SectionPlaceholder({
 }
 
 export function UserDetailView({ profile }: UserDetailViewProps) {
-  const { t, formatNumber } = useI18n();
+  const { t, formatNumber, locale } = useI18n();
 
   const level = pickNumber(profile, ["level", "lv", "playerLevel"]);
   const combatPower = pickNumber(profile, ["combatPower", "power", "totalPower"]);
@@ -161,7 +162,9 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             {equipment.map((item) => {
               const slotLabel = getEquipmentSlotLabel(item.slotKey, t.equipment);
-              const displayName = item.empty || !item.name ? t.equipment.unequipped : item.name;
+              const localizedName = getLocalizedEquipmentName(item, locale);
+              const displayName =
+                item.empty || !localizedName ? t.equipment.unequipped : localizedName;
               const subOptions = item.options.map((option) =>
                 formatEquipmentOption(option, t.stats),
               );
@@ -181,9 +184,6 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
                         {slotLabel}
                       </p>
                       <h3 className="mt-1 text-lg font-bold text-white">{displayName}</h3>
-                      {item.nameEn && item.nameEn !== item.name && (
-                        <p className="text-sm text-[#9aa0ae]">{item.nameEn}</p>
-                      )}
                     </div>
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#3d3d4a] bg-[#1c1c1f] text-[#5383e8]">
                       <Swords className="h-4 w-4" />
