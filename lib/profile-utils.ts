@@ -1,6 +1,7 @@
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/locales";
 import { resolveLocalizedItemName } from "@/lib/item-names";
+import { resolveLocalizedPrefixName } from "@/lib/prefix-names";
 
 export type PublicProfile = {
   id: string;
@@ -99,9 +100,12 @@ function formatStatType(statType: string | undefined, stats: Dictionary["stats"]
 export function formatEquipmentOption(
   option: EquipmentOption,
   stats: Dictionary["stats"],
+  locale: Locale,
 ): string {
   const stat = formatStatType(option.statType, stats);
-  const prefix = option.name?.trim();
+  const prefix = option.name
+    ? resolveLocalizedPrefixName(option.name, locale)
+    : "";
 
   if (option.type === "percentage" && option.percentageValue != null) {
     const pct = Math.round(option.percentageValue * 1000) / 10;
@@ -116,7 +120,14 @@ export function formatEquipmentOption(
     return prefix ? `${prefix} · ${String(option.specialValue)}` : String(option.specialValue);
   }
 
-  return prefix ?? stats.subOption;
+  return prefix || stats.subOption;
+}
+
+export function getLocalizedPrefixName(
+  rawName: string,
+  locale: Locale,
+): string {
+  return resolveLocalizedPrefixName(rawName, locale);
 }
 
 function parseEquipmentItem(item: unknown, slotKey: EquipmentSlotKey): ParsedEquipment {

@@ -17,6 +17,7 @@ import {
   extractEquipment,
   extractTitles,
   formatEquipmentOption,
+  getLocalizedPrefixName,
   formatRarity,
   getEquipmentSlotLabel,
   getLocalizedEquipmentName,
@@ -166,7 +167,7 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
               const displayName =
                 item.empty || !localizedName ? t.equipment.unequipped : localizedName;
               const subOptions = item.options.map((option) =>
-                formatEquipmentOption(option, t.stats),
+                formatEquipmentOption(option, t.stats, locale),
               );
 
               return (
@@ -216,7 +217,7 @@ export function UserDetailView({ profile }: UserDetailViewProps) {
                                 key={prefix}
                                 className="rounded-lg border border-[#5383e8]/30 bg-[#5383e8]/10 px-2.5 py-1 text-sm font-medium text-[#9eb8ff]"
                               >
-                                {prefix}
+                                {getLocalizedPrefixName(prefix, locale)}
                               </span>
                             ))}
                           </div>
