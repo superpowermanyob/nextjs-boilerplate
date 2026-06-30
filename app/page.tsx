@@ -11,6 +11,7 @@ import {
 import { GuildRankingBoard } from "@/components/GuildRankingBoard";
 import { PatchNotesMarquee } from "@/components/PatchNotesMarquee";
 import { useI18n } from "@/components/I18nProvider";
+import { RankingBottomGuide } from "@/components/RankingBottomGuide";
 import { RankingBoard } from "@/components/RankingBoard";
 import { RankingTabBar } from "@/components/RankingTabBar";
 import { WeeklyResetCountdown } from "@/components/WeeklyResetCountdown";
@@ -152,6 +153,8 @@ export default function Home() {
             />
           )}
         </section>
+
+        <RankingBottomGuide />
       </main>
     </div>
   );
