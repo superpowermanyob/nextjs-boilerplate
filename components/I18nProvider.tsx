@@ -69,14 +69,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const formatFocusTime = useCallback(
     (minutes: number) => {
-      if (minutes >= 60) {
-        const hours = Math.floor(minutes / 60);
-        const mins = minutes % 60;
-        return mins > 0
-          ? format(t.focus.hoursMinutes, { hours, minutes: mins })
-          : format(t.focus.hoursOnly, { hours });
-      }
-      return format(t.focus.minutes, { minutes });
+      const totalMinutes = Number.isFinite(minutes)
+        ? Math.floor(Math.max(minutes, 0))
+        : 0;
+      const hours = Math.floor(totalMinutes / 60);
+      return format(t.focus.hoursOnly, { hours });
     },
     [format, t],
   );
