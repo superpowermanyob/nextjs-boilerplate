@@ -23,9 +23,6 @@ const RARITIES = [
   { key: "rarityTranscendent", descKey: "guideRarityTranscendentDesc", optionCount: 5, color: "#7f1d1d", growthKey: "guideRarityGrowthTranscendent" },
   { key: "rarityEternal", descKey: "guideRarityEternalDesc", optionCount: 6, color: "#e3e8ee", growthKey: "guideRarityGrowthEternal" },
   { key: "rarityImmortal", descKey: "guideRarityImmortalDesc", optionCount: 7, color: "#ffd700" },
-  { key: "rarityAbsolute", descKey: "guideRarityAbsoluteDesc", optionCount: 8, color: "#ffaa00" },
-  { key: "rarityPrimal", descKey: "guideRarityPrimalDesc", optionCount: 9, color: "#e8e8ff" },
-  { key: "rarityDivine", descKey: "guideRarityDivineDesc", optionCount: 10, color: "#aaddff" },
 ] as const;
 
 const STATS = [
