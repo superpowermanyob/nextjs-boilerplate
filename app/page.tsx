@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
 
 import { DocumentTitle } from "@/components/DocumentTitle";
+import { AdBanner } from "@/components/AdBanner";
 import {
   EnhancedSearchBar,
   FavoriteUserBanner,
@@ -92,6 +93,8 @@ export default function Home() {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(83,131,232,0.12),transparent_40%),radial-gradient(circle_at_80%_100%,rgba(139,92,246,0.08),transparent_35%)]" />
 
       <main className="relative mx-auto w-full max-w-7xl px-4 pb-6 pt-28 sm:px-6 sm:pb-10 sm:pt-32 lg:px-8">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_160px] lg:gap-8">
+          <div className="min-w-0">
         <header className="mb-8 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#5383e8]/30 bg-[#5383e8]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-[#9eb8ff]">
             <Trophy className="h-3.5 w-3.5" />
@@ -131,6 +134,12 @@ export default function Home() {
             <WeeklyResetCountdown weekId={weeklyWeekId} />
           )}
 
+          <AdBanner
+            dataAdSlot="6425037619"
+            dataAdFormat="auto"
+            className="mb-6 overflow-hidden rounded-2xl border border-[#3d3d4a]/60 bg-[#282830]/40 p-2"
+          />
+
           {rankingError && (
             <div
               role="alert"
@@ -154,7 +163,25 @@ export default function Home() {
           )}
         </section>
 
+        <AdBanner
+          dataAdSlot="9186932329"
+          dataAdFormat="auto"
+          className="mt-10 overflow-hidden rounded-2xl border border-[#3d3d4a]/60 bg-[#282830]/40 p-2"
+        />
+
         <RankingBottomGuide />
+          </div>
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-32">
+              <AdBanner
+                dataAdSlot="9036712917"
+                dataAdFormat="auto"
+                className="overflow-hidden rounded-2xl border border-[#3d3d4a]/60 bg-[#282830]/40 p-2"
+              />
+            </div>
+          </aside>
+        </div>
       </main>
     </div>
   );
